@@ -25,6 +25,7 @@ class DecisionTree {
       this.storage = this._loadStorage(id);
       // Activate the decision tree.
       this.activate();
+      this.initializeForms();  // Ensure forms are initialized after activation
       // Track answer.
       document.querySelectorAll('#' + id + ' .step .step__answer')
       .forEach(function (answer) {
@@ -102,28 +103,25 @@ class DecisionTree {
    * Load the active decision tree from local storage.
    */
   _loadStorage(id) {
-    let storage = JSON.parse(localStorage.getItem(id)) || {};
-    if (storage[this.config.id] !== undefined) {
+    let namespace = `decision-tree.${id}`;
+    let storage = JSON.parse(localStorage.getItem(namespace)) || {};
+    if (storage[id] !== undefined) {
       storage = this._validateHistory(storage);
-      return storage[this.config.id];
+      return storage[id];
     }
     return {
       first_step: this.config.first_step, active: this.config.first_step, history: [this.config.first_step]
-    }
+    };
   }
 
   /**
    * Save the active decision tree to local storage.
    */
   _saveStorage() {
-    let storage = JSON.parse(localStorage.getItem(this.config.id)) || {};
+    let namespace = `decision-tree.${this.config.id}`;
+    let storage = JSON.parse(localStorage.getItem(namespace)) || {};
     storage[this.config.id] = this.storage;
-
-    // Clean storage if it has empty data.
-    if (!this.storage.active || !this.storage.history) {
-      storage = {};
-    }
-    localStorage.setItem(this.config.id, JSON.stringify(storage));
+    localStorage.setItem(namespace, JSON.stringify(storage));
   }
 
   /**
@@ -216,6 +214,70 @@ class DecisionTree {
     });
   }
 
+  _handleFormSubmit(form) {
+    let formData = new FormData(form);
+    formData.forEach((value, key) => {
+        let varName = `decision-tree.${this.config.id}.vars.${key}`;
+        localStorage.setItem(varName, value);
+    });
+    let nextStep = form.getAttribute('action').replace('#', '');
+    this.trackAnswer(nextStep);
+  }
+
+  _filterElement(element) {
+    let filters = element.getAttribute('data-dt-filter');
+    if (!filters) return true;
+
+    return filters.split(',').every(filter => {
+      let [criteria, condition] = filter.split('+');
+      if (criteria.startsWith('!')) {
+          return !this._evaluateCriteria(criteria.slice(1), condition);
+      }
+      return this._evaluateCriteria(criteria, condition);
+    });
+  }
+
+  _evaluateCriteria(criteria, condition) {
+    if (criteria.startsWith('var_')) {
+      let [variable, operation, value] = criteria.slice(4).split('_');
+      return this._compare(localStorage.getItem(`decision-tree.${this.config.id}.vars.${variable}`), operation, value);
+    } else if (criteria.startsWith('visited_')) {
+      return this.storage.history.includes(criteria.slice(8));
+    }
+    return false;
+  }
+
+  _compare(variableValue, operator, comparator) {
+    variableValue = Number(variableValue);
+    comparator = Number(comparator);
+    switch (operator) {
+      case 'gt': return variableValue > comparator;
+      case 'gte': return variableValue >= comparator;
+      case 'lt': return variableValue < comparator;
+      case 'lte': return variableValue <= comparator;
+      case 'eq': return variableValue === comparator;
+      case 'empty': return variableValue === '';
+      default: return false;
+    }
+  }
+
+  _showHistory() {
+    let historyElement = document.querySelector('#' + this.config.id + ' .decision-tree__history');
+    historyElement.innerHTML = this.storage.history.join(', ');
+  }
+
+  _showSubmission() {
+    let submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
+    let submissions = Object.keys(localStorage)
+      .filter(key => key.startsWith(`decision-tree.${this.config.id}.vars`))
+      .reduce((acc, key) => {
+          let cleanKey = key.split('.').pop();
+          acc[cleanKey] = localStorage.getItem(key);
+          return acc;
+      }, {});
+    submissionElement.innerHTML = JSON.stringify(submissions);
+  }
+
   /**
    * Show the active step of the active decision tree and store it to local
    * storage.
@@ -270,6 +332,15 @@ class DecisionTree {
       this.hide('#' + this.config.id)
       console.warn('Cannot activate decision tree with ID ' + this.config.id + '. Incorrect HTML structure.');
     }
+  }
+
+  initializeForms() {
+    document.querySelectorAll('#' + this.config.id + ' .dt-form').forEach((form) => {
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        this._handleFormSubmit(form);
+      });
+    });
   }
 
   /**
