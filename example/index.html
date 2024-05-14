@@ -3,277 +3,181 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Decision Tree HTML example</title>
-    <link rel="stylesheet" type="text/css" href="./../style.css">
-    <script type="text/javascript" src="./../decision_tree.js"></script>
+    <title>Decision Tree HTML Example</title>
+    <link rel="stylesheet" type="text/css" href="../style.css">
+    <script type="text/javascript" src="../decision_tree.js" defer></script>
 </head>
 <body>
-<div class="decision-tree" id="bookshop">
-    <div class="step" id="bookshop-welcome" data-cookie="outcome=bookshop-welcome">
-        <h3>Welcome to first example - Book store.</h3>
-        <p>So that we can help you better, we would like to know a little bit more about you.</p>
-        <h4>What brings you here today?</h4>
-        <ul>
-            <li>
-                <a class="step__answer" href="#bookshop-find" data-answer-path="shopping">
-                    Shopping
-                </a>
-            </li>
-            <li>
-                <a class="step__answer" href="#bookshop-education" data-answer-path="education">
-                    Education
-                </a>
-            </li>
-        </ul>
-    </div>
-    <div class="step" id="bookshop-find">
-        <h3>Let's see if we can find something for you</h3>
-        <p>We have a wide range of topics suitable for you.</p>
-        <h4>What is your interest?</h4>
-        <ul>
-            <li>
-                <a class="step__answer" href="#bookshop-sci-fi" data-answer-path="sci-fi">
-                    Sci-fi
-                </a>
-            </li>
-            <li>
-                <a class="step__answer" href="#bookshop-fantasy" data-answer-path="fantasy">
-                    Fantasy
-                </a>
-            </li>
-            <li>
-                <a class="step__answer" href="#bookshop-comedic-fiction" data-answer-path="comedic-fiction">
-                    Comedic fiction
-                </a>
-            </li>
-            <li>
-                <a class="step__answer" href="#bookshop-none" data-answer-path="none">
-                    None of these
-                </a>
-            </li>
-        </ul>
-        <div class="step__info">
-            <p>You came here today to shop.</p>
+    <h1>Examples</h1>
+    <h2>Bookshop</h2>
+    <div class="decision-tree" id="bookshop">
+        <!-- Welcome Step with Form Input -->
+        <div class="step" id="bookshop-welcome">
+            <h3>Welcome to Our Bookshop</h3>
+            <div class="step-content">
+                <p>So that we can help you better, please tell us a bit about your reading preferences:</p>
+                <form class="dt-form" action="#bookshop-find">
+                    <label for="purpose">What brings you here today?</label>
+                    <select name="purpose" required>
+                        <option value="shopping">Shopping</option>
+                        <option value="education">Education</option>
+                    </select>
+                    <label for="age">What is your age?</label>
+                    <input type="number" name="age" placeholder="Your age" required>
+                    <input type="submit" value="Continue">
+                </form>
+            </div>
+        </div>
+
+        <!-- Category Selection Step -->
+        <div class="step" id="bookshop-find">
+            <h3>Let's see if we can find something for you</h3>
+            <div class="step-content">
+                <p>We have a wide range of topics suitable for you.</p>
+                <h4>What is your interest?</h4>
+                <ul>
+                    <li><a class="step__answer" href="#bookshop-sci-fi">Sci-fi</a></li>
+                    <li><a class="step__answer" href="#bookshop-fantasy">Fantasy</a></li>
+                    <li><a class="step__answer" href="#bookshop-comedic-fiction">Comedic fiction</a></li>
+                    <li><a class="step__answer" href="#bookshop-none">None of these</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Detailed Steps for Each Category -->
+        <div class="step" id="bookshop-sci-fi">
+            <h3>Sci-fi Books</h3>
+            <div class="step-content">
+                <p>Explore our collection of science fiction novels and series.</p>
+            </div>
+        </div>
+        <div class="step" id="bookshop-fantasy">
+            <h3>Fantasy Books</h3>
+            <div class="step-content">
+                <p>Discover worlds of magic and myth in our fantasy section.</p>
+            </div>
+        </div>
+        <div class="step" id="bookshop-comedic-fiction">
+            <h3>Comedic Fiction</h3>
+            <div class="step-content">
+                <p>Laugh out loud with our range of comedic fiction.</p>
+            </div>
+        </div>
+        <div class="step" id="bookshop-none">
+            <h3>Explore Other Genres</h3>
+            <div class="step-content">
+                <p>Check out other genres that might suit your taste.</p>
+            </div>
+        </div>
+
+        <!-- Filters and Age-based Content -->
+        <div class="step" id="bookshop-age-based">
+            <h3>Age-based Recommendations</h3>
+            <div class="step-content" data-dt-filter="var_age_gte_18">
+                <p>Since you are over 18, you might enjoy these mature reads.</p>
+            </div>
+            <div class="step-content" data-dt-filter="var_age_lt_18">
+                <p>For readers under 18, we recommend these young adult novels.</p>
+            </div>
+        </div>
+
+        <!-- Summary and Footer -->
+        <div class="decision-tree__summary">
+            <div class="decision-tree__summary_infos"></div>
+            <div class="decision-tree__history"></div>
+            <div class="decision-tree__submission"></div>
+        </div>
+        <div class="decision-tree__footer">
+            <button class="btn btn-secondary step__button step__button--back">Back</button>
+            <button class="btn btn-secondary step__button step__button--restart">Restart</button>
         </div>
     </div>
-    <div class="step" id="bookshop-education" data-cookie="outcome=bookshop-education">
-        <h3>Find out about the Bookstore</h3>
-        <p>You came here to find out about the bookstore. Please take a look around. We recommend that you start by
-            finding out more about us, or perhaps you would like to browse our catalog.</p>
-        <div class="step__info">
-            <p>You came here for educational purposes.</p>
+
+    <h2>Bar</h2>
+
+    <div class="decision-tree" id="bar">
+        <!-- Welcome Step with Form Input -->
+        <div class="step" id="bar-welcome">
+            <h3>Welcome to Our Bar</h3>
+            <div class="step-content">
+                <p>To start, please tell us your nationality and age:</p>
+                <form class="dt-form" action="#bar-drink-preference">
+                    <label for="nationality">Your nationality:</label>
+                    <select name="nationality" required>
+                        <option value="czech">Czech</option>
+                        <option value="australian">Australian</option>
+                    </select>
+                    <label for="age">Your age:</label>
+                    <input type="number" name="age" placeholder="Your age" required>
+                    <input type="submit" value="Next">
+                </form>
+            </div>
+        </div>
+
+        <!-- Drink Preference Step -->
+        <div class="step" id="bar-drink-preference">
+            <h3>Choose Your Drink Preference</h3>
+            <div class="step-content">
+                <p>What type of drink do you prefer?</p>
+                <ul>
+                    <li><a class="step__answer" href="#bar-beer">Beer</a></li>
+                    <li><a class="step__answer" href="#bar-vodka">Vodka</a></li>
+                    <li><a class="step__answer" href="#bar-water">Water</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Drink Options -->
+        <div class="step" id="bar-beer">
+            <h3>Beer Selection</h3>
+            <div class="step-content">
+                <ul>
+                    <li>Pilsner Urquell</li>
+                    <li data-dt-filter="var_nationality_eq_australian">VB</li>
+                    <li>Asahi</li>
+                </ul>
+            </div>
+        </div>
+        <div class="step" id="bar-vodka">
+            <h3>Vodka Selection</h3>
+            <div class="step-content">
+                <ul>
+                    <li>Smirnoff</li>
+                    <li>Belvedere</li>
+                </ul>
+            </div>
+        </div>
+        <div class="step" id="bar-water">
+            <h3>Water Selection</h3>
+            <div class="step-content">
+                <ul>
+                    <li>Still Water</li>
+                    <li>Sparkling Water</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Filters and Age-based Content -->
+        <div class="step" id="bar-age-based">
+            <h3>Age-based Drink Recommendations</h3>
+            <div class="step-content" data-dt-filter="var_age_gte_18">
+                <p>Since you are over 18, you might enjoy these alcoholic beverages.</p>
+            </div>
+            <div class="step-content" data-dt-filter="var_age_lt_18">
+                <p>For non-alcoholic options, try our juices and sodas.</p>
+            </div>
+        </div>
+
+        <!-- Summary and Footer -->
+        <div class="decision-tree__summary">
+            <div class="decision-tree__summary_infos"></div>
+            <div class="decision-tree__history"></div>
+            <div class="decision-tree__submission"></div>
+        </div>
+        <div class="decision-tree__footer">
+            <button class="btn btn-secondary step__button step__button--back">Back</button>
+            <button class="btn btn-secondary step__button step__button--restart">Restart</button>
         </div>
     </div>
-    <div class="step" id="bookshop-sci-fi" data-cookie="outcome=bookshop-sci-fi">
-        <h3>Sci-fi</h3>
-        <p>We have a large selection of sci-fi books available for purchase. Please visit the sci-fi section of the
-            bookstore to browse the titles.</p>
-        <div class="step__info">
-            <p>You are interested in sci-fi.</p>
-        </div>
-    </div>
-    <div class="step" id="bookshop-fantasy" data-cookie="outcome=bookshop-fantasy" data-pass-filter="">
-        <h3>Fantasy</h3>
-        <p>We have a large range of fantasy books for purchase. Please visit the fantasy section of the bookstore to
-            browse the titles.</p>
-        <div class="step__info">
-            <p>You are interested in fantasy.</p>
-        </div>
-    </div>
-    <div class="step" id="bookshop-comedic-fiction" data-cookie="outcome=bookshop-comedic-fiction">
-        <h3>Comedic fiction</h3>
-        <p>We have a large range of comedic fiction books for purchase. Please visit the comedic fiction section of
-            the bookstore to browse the titles.</p>
-        <div class="step__info">
-            <p>You are interested in comedic fiction.</p>
-        </div>
-    </div>
-    <div class="step" id="bookshop-none" data-cookie="outcome=bookshop-none">
-        <h3>None of these</h3>
-        <p>None of the listed categories suits you.</p>
-        <div class="step__info">
-            <p>You are interested in other categories.</p>
-        </div>
-    </div>
-</div>
-<br>
-<div class="decision-tree" id="bar">
-    <div class="step" id="bar-welcome" data-cookie="outcome=bar-welcome">
-        <h3>Welcome to more complex example - Bar.</h3>
-        <div class="step__info">
-            <h3>You are in our bar example.</h3>
-            <p>Bar is offering many types of beverages.</p>
-        </div>
-        <h4>Your nationality?</h4>
-        <ul>
-            <li>
-                <a class="step__answer" href="#czech" data-answer-path="czech">
-                    Czech
-                </a>
-            </li>
-            <li>
-                <a class="step__answer" href="#australian" data-answer-path="australian">
-                    Australian
-                </a>
-            </li>
-        </ul>
-    </div>
-    <div class="step" id="czech" data-show-summary="on">
-        <h3>Let's see if we can find something for you.</h3>
-        <p>We have a wide range of drinks on the menu.</p>
-        <div class="step__info">
-            You are Czech.
-        </div>
-        <h4>Which type of drink do you prefer?</h4>
-        <ul>
-            <li>
-                <a class="step__answer" href="#beer-drinker" data-answer-path="beer-drinker">
-                    Beer drinker
-                </a>
-            </li>
-            <li>
-                <a class="step__answer" href="#vodka-drinker" data-answer-path="vodka-drinker">
-                    Vodka drinker
-                </a>
-            </li>
-            <li>
-                <a class="step__answer" href="#water-drinker" data-answer-path="water-drinker">
-                    Water drinker
-                </a>
-            </li>
-        </ul>
-    </div>
-    <div class="step" id="australian">
-        <h3>Let's see if we can find something for you</h3>
-        <p>We have a wide range of drinks on the menu.</p>
-        <div class="step__info">
-            <p>You are Australian.</p>
-        </div>
-        <h4>Which type of drink do you prefer?</h4>
-        <ul>
-            <li>
-                <a class="step__answer" href="#beer-drinker" data-answer-path="beer-drinker">
-                    Beer drinker
-                </a>
-            </li>
-            <li>
-                <a class="step__answer" href="#vodka-drinker" data-answer-path="vodka-drinker">
-                    Vodka drinker
-                </a>
-            </li>
-            <li>
-                <a class="step__answer" href="#water-drinker" data-answer-path="water-drinker">
-                    Water drinker
-                </a>
-            </li>
-        </ul>
-    </div>
-    <div class="step" id="vodka-drinker">
-        <h3>Let's see if we can find something for you</h3>
-        <p>We have a wide range of drinks on the menu for vodka drinkers.</p>
-        <div class="step__info">
-            <ul>
-                <li>
-                    Pilsner Urquell
-                </li>
-                <li data-pass-filter="australian beer-drinker">
-                    VB
-                </li>
-                <li data-pass-filter="beer-drinker">
-                    Asahi
-                </li>
-                <li data-pass-filter="vodka-drinker">
-                    Vodka
-                </li>
-                <li>
-                    Lemonade
-                </li>
-                <li>
-                    Cola
-                </li>
-                <li data-stop-filter="vodka-drinker, beer-drinker">
-                    Water
-                </li>
-                <li data-stop-filter="vodka-drinker" data-pass-filter="czech beer-drinker">
-                    Special for Czech beer lovers.
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="step" id="water-drinker">
-        <h3>Let's see if we can find something for you</h3>
-        <p>We have a wide range of drinks on the menu for water drinkers.</p>
-        <div class="step__info">
-            <ul>
-                <li>
-                    Pilsner Urquell
-                </li>
-                <li data-pass-filter="australian beer-drinker">
-                    VB
-                </li>
-                <li data-pass-filter="beer-drinker">
-                    Asahi
-                </li>
-                <li data-pass-filter="vodka-drinker">
-                    Vodka
-                </li>
-                <li>
-                    Lemonade
-                </li>
-                <li>
-                    Cola
-                </li>
-                <li data-stop-filter="vodka-drinker, beer-drinker">
-                    Water
-                </li>
-                <li data-stop-filter="vodka-drinker" data-pass-filter="czech beer-drinker">
-                    Special for Czech beer lovers.
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="step" id="beer-drinker">
-        <h3>Let's see if we can find something for you.</h3>
-        <p>We have a wide range of drinks on the menu for beer drinkers.</p>
-        <div class="step__info">
-            <ul>
-                <li>
-                    Pilsner Urquell
-                </li>
-                <li data-pass-filter="australian beer-drinker">
-                    VB
-                </li>
-                <li data-pass-filter="beer-drinker">
-                    Asahi
-                </li>
-                <li data-pass-filter="vodka-drinker">
-                    Vodka
-                </li>
-                <li>
-                    Lemonade
-                </li>
-                <li>
-                    Cola
-                </li>
-                <li data-stop-filter="vodka-drinker, beer-drinker">
-                    Water
-                </li>
-                <li data-stop-filter="vodka-drinker" data-pass-filter="czech beer-drinker">
-                    Special for Czech beer lovers
-                </li>
-            </ul>
-        </div>
-    </div>
-    <div class="decision-tree__summary">
-        <h3>Bar summary</h3>
-        <!-- Summary of answers will be placed in div decision-tree__summary_infos - can be placed anywhere inside decision-tree__summary div -->
-        <div class="decision-tree__summary_infos">
-        </div>
-    </div>
-    <div class="decision-tree__footer">
-        <button class="step__button step__button--back">Back</button>
-        <button class="step__button step__button--restart">Restart</button>
-    </div>
-</div>
 </body>
 </html>
