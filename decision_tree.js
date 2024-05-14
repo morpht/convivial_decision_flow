@@ -252,6 +252,8 @@ class DecisionTree {
   _compare(variableValue, operator, comparator) {
     variableValue = Number(variableValue);
     comparator = Number(comparator);
+
+    console.log(variableValue, operator, comparator);
     switch (operator) {
       case 'gt': return variableValue > comparator;
       case 'gte': return variableValue >= comparator;
