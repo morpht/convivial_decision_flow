@@ -16,7 +16,7 @@ class DecisionTree {
 
     const steps = this._loadSteps(id);
     if (Array.isArray(steps)) {
-      this.config = { id, first_step: steps[0], steps };
+      this.config = {id, first_step: steps[0], steps};
       if (!this._isLocalStorageAvailable()) {
         return;
       }
@@ -28,13 +28,13 @@ class DecisionTree {
       this.initializeForms();  // Ensure forms are initialized after activation
       // Track answer.
       document.querySelectorAll('#' + id + ' .step .step__answer')
-        .forEach(function (answer) {
-          if (answer.hasAttribute('href')) {
-            answer.addEventListener('click', () => {
-              this.trackAnswer(answer.attributes.href.value.replace('#', ''), answer.hasAttribute('data-answer-path') ? answer.attributes['data-answer-path'].value : false);
-            })
-          }
-        }, this);
+      .forEach((answer) => {
+        if (answer.hasAttribute('href')) {
+          answer.addEventListener('click', () => {
+            this.trackAnswer(answer.attributes.href.value.replace('#', ''), answer.hasAttribute('data-answer-path') ? answer.attributes['data-answer-path'].value : false);
+          });
+        }
+      });
     } else {
       throw new Error('Please follow proper HTML structure.');
     }
@@ -52,7 +52,7 @@ class DecisionTree {
       localStorage.setItem(test, test);
       localStorage.removeItem(test);
       return true;
-    } catch (e) {
+    } catch(e) {
       console.log('Decision tree will not work optimally because the browser local storage is not enabled or accessible.');
       return false;
     }
@@ -64,11 +64,11 @@ class DecisionTree {
   _loadSteps(id) {
     const steps = [];
     document
-      .querySelector('#' + id)
-      .querySelectorAll('.step')
-      .forEach(function (el, index) {
-        steps.push(el.id);
-      })
+    .querySelector('#' + id)
+    .querySelectorAll('.step')
+    .forEach(function (el, index) {
+      steps.push(el.id);
+    });
     if (steps.length < 1) {
       console.warn('Decision tree should have at least one step.');
     }
@@ -200,14 +200,16 @@ class DecisionTree {
         this.hide('#' + this.config.id + ' .decision-tree__summary');
       }
     }
+    this._showHistory();
+    this._showSubmission();
   }
 
   _cleanHTML() {
     // Clean HTML of all answers and remove styles.
     document.querySelectorAll('#' + this.config.id + ' .decision-tree__summary_infos *')
-      .forEach(function (element) {
-        element.remove();
-      });
+    .forEach(function (element) {
+      element.remove();
+    });
 
     document.querySelectorAll('#' + this.config.id + ' .decision-tree__summary').forEach((element) => {
       element.removeAttribute('style');
@@ -217,8 +219,8 @@ class DecisionTree {
   _handleFormSubmit(form) {
     let formData = new FormData(form);
     formData.forEach((value, key) => {
-      let varName = `decision-tree.${this.config.id}.vars.${key}`;
-      localStorage.setItem(varName, value);
+        let varName = `decision-tree.${this.config.id}.vars.${key}`;
+        localStorage.setItem(varName, value);
     });
     let nextStep = form.getAttribute('action').replace('#', '');
     this.trackAnswer(nextStep);
@@ -226,12 +228,13 @@ class DecisionTree {
 
   _filterElement(element) {
     let filters = element.getAttribute('data-dt-filter');
+    console.log(filters);
     if (!filters) return true;
 
     return filters.split(',').every(filter => {
       let [criteria, condition] = filter.split('+');
       if (criteria.startsWith('!')) {
-        return !this._evaluateCriteria(criteria.slice(1), condition);
+          return !this._evaluateCriteria(criteria.slice(1), condition);
       }
       return this._evaluateCriteria(criteria, condition);
     });
@@ -240,6 +243,7 @@ class DecisionTree {
   _evaluateCriteria(criteria, condition) {
     if (criteria.startsWith('var_')) {
       let [variable, operation, value] = criteria.slice(4).split('_');
+      console.log(variable, operation, value);
       return this._compare(localStorage.getItem(`decision-tree.${this.config.id}.vars.${variable}`), operation, value);
     } else if (criteria.startsWith('visited_')) {
       return this.storage.history.includes(criteria.slice(8));
@@ -263,19 +267,23 @@ class DecisionTree {
 
   _showHistory() {
     let historyElement = document.querySelector('#' + this.config.id + ' .decision-tree__history');
-    historyElement.innerHTML = this.storage.history.join(', ');
+    if (historyElement) {
+      historyElement.innerHTML = '<pre>' + this.storage.history.join(', ') + '</pre>';
+    }
   }
 
   _showSubmission() {
     let submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
-    let submissions = Object.keys(localStorage)
-      .filter(key => key.startsWith(`decision-tree.${this.config.id}.vars`))
-      .reduce((acc, key) => {
-        let cleanKey = key.split('.').pop();
-        acc[cleanKey] = localStorage.getItem(key);
-        return acc;
-      }, {});
-    submissionElement.innerHTML = JSON.stringify(submissions);
+    if (submissionElement) {
+      let submissions = Object.keys(localStorage)
+        .filter(key => key.startsWith(`decision-tree.${this.config.id}.vars`))
+        .reduce((acc, key) => {
+            let cleanKey = key.split('.').pop();
+            acc[cleanKey] = localStorage.getItem(key);
+            return acc;
+        }, {});
+      submissionElement.innerHTML = '<pre>' + JSON.stringify(submissions) + '</pre>';
+    }
   }
 
   /**
@@ -292,11 +300,6 @@ class DecisionTree {
         this.hide(step);
       });
 
-      // Show only the step-content of the active step
-      document.querySelectorAll('#' + this.config.id + ' .step-content').forEach((content) => {
-        this.hide(content);
-      });
-
       // Toggle footer.
       this.toggleFooter();
 
@@ -311,11 +314,6 @@ class DecisionTree {
 
       // Load current step.
       this.show('#' + this.config.id + ' #' + this.storage.active);
-
-      // Show step-content for the active step
-      document.querySelectorAll('#' + this.config.id + ' #' + this.storage.active + ' .step-content').forEach((content) => {
-        this.show(content);
-      });
 
       // If it is a last step - show Summary.
       this._showSummary();
@@ -339,7 +337,7 @@ class DecisionTree {
       // Save the storage.
       this._saveStorage();
     } catch (e) {
-      this.hide('#' + this.config.id)
+      this.hide('#' + this.config.id);
       console.warn('Cannot activate decision tree with ID ' + this.config.id + '. Incorrect HTML structure.');
     }
   }
@@ -403,7 +401,7 @@ class DecisionTree {
 
         show_step = pass.every((and) => {
           return this.is_in_history(and.trim());
-        })
+        });
       }
 
       if (info.hasAttribute('data-stop-filter')) {
@@ -415,7 +413,7 @@ class DecisionTree {
           if (show_step === true && result === true) {
             show_step = false;
           }
-        })
+        });
       }
 
       if (show_step === false) {
@@ -423,7 +421,7 @@ class DecisionTree {
       } else {
         this.show(info);
       }
-    })
+    });
   }
 
   is_in_history(filter_array) {
@@ -468,11 +466,6 @@ class DecisionTree {
     // Show next step.
     this.show('#' + this.config.id + ' #' + nextStep);
 
-    // Show step-content for the next step
-    document.querySelectorAll('#' + this.config.id + ' #' + nextStep + ' .step-content').forEach((content) => {
-      this.show(content);
-    });
-
     // Track new step display.
     this.trackGA(nextStep + '/');
 
@@ -509,11 +502,6 @@ class DecisionTree {
     // Show previous step from history.
     const previousStep = this.storage.history[this.storage.history.length - 2];
     this.show('#' + this.config.id + ' #' + previousStep);
-
-    // Show step-content for the previous step
-    document.querySelectorAll('#' + this.config.id + ' #' + previousStep + ' .step-content').forEach((content) => {
-      this.show(content);
-    });
 
     // Track current step.
     this.trackGA(previousStep + '/back');
@@ -556,11 +544,6 @@ class DecisionTree {
     // Show the first step.
     this.show('#' + this.config.id + ' #' + this.storage.active);
 
-    // Show step-content for the first step
-    document.querySelectorAll('#' + this.config.id + ' #' + this.storage.active + ' .step-content').forEach((content) => {
-      this.show(content);
-    });
-
     // Send first step data to GA.
     this.trackGA(this.storage.active);
 
@@ -599,11 +582,11 @@ class DecisionTree {
    */
   trackGA(path) {
     if (typeof gtag === 'function' && drupalSettings.google_analytics !== undefined) {
-      gtag('config', drupalSettings.google_analytics.account, { page_path: window.location.href + this.config.id + '/' + path });
+      gtag('config', drupalSettings.google_analytics.account, {page_path: window.location.href + this.config.id + '/' + path});
     } else if (typeof ga === 'function' && ga.getAll()[0].get('clientId') !== null && ga.getAll()[0].get('trackingId') !== null) {
       ga('create', ga.getAll()[0].get('trackingId'), {
         clientId: ga.getAll()[0].get('clientId')
-      })
+      });
       ga('send', 'pageview', window.location.href + this.config.id + '/' + path);
     }
   }
