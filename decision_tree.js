@@ -199,9 +199,10 @@ class DecisionTree {
       } else {
         this.hide('#' + this.config.id + ' .decision-tree__summary');
       }
+      this._showHistory();
+      this._showSubmission();
     }
-    this._showHistory();
-    this._showSubmission();
+
   }
 
   _cleanHTML() {
@@ -224,6 +225,7 @@ class DecisionTree {
     });
     let nextStep = form.getAttribute('action').replace('#', '');
     this.trackAnswer(nextStep);
+    this.filter();
   }
 
   _filterElement(element) {
