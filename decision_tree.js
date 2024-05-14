@@ -16,25 +16,25 @@ class DecisionTree {
 
     const steps = this._loadSteps(id);
     if (Array.isArray(steps)) {
-      this.config = {id, first_step: steps[0], steps};
+      this.config = { id, first_step: steps[0], steps };
       if (!this._isLocalStorageAvailable()) {
         return;
       }
 
-      // load all the steps available in DOM.
+      // Load all the steps available in DOM.
       this.storage = this._loadStorage(id);
       // Activate the decision tree.
       this.activate();
       this.initializeForms();  // Ensure forms are initialized after activation
       // Track answer.
       document.querySelectorAll('#' + id + ' .step .step__answer')
-      .forEach((answer) => {
-        if (answer.hasAttribute('href')) {
-          answer.addEventListener('click', () => {
-            this.trackAnswer(answer.attributes.href.value.replace('#', ''), answer.hasAttribute('data-answer-path') ? answer.attributes['data-answer-path'].value : false);
-          });
-        }
-      });
+        .forEach(function (answer) {
+          if (answer.hasAttribute('href')) {
+            answer.addEventListener('click', () => {
+              this.trackAnswer(answer.attributes.href.value.replace('#', ''), answer.hasAttribute('data-answer-path') ? answer.attributes['data-answer-path'].value : false);
+            })
+          }
+        }, this);
     } else {
       throw new Error('Please follow proper HTML structure.');
     }
@@ -52,23 +52,23 @@ class DecisionTree {
       localStorage.setItem(test, test);
       localStorage.removeItem(test);
       return true;
-    } catch(e) {
+    } catch (e) {
       console.log('Decision tree will not work optimally because the browser local storage is not enabled or accessible.');
       return false;
     }
   }
 
   /**
-   * load all the steps of the active decision tree into config.
+   * Load all the steps of the active decision tree into config.
    */
   _loadSteps(id) {
     const steps = [];
     document
-    .querySelector('#' + id)
-    .querySelectorAll('.step')
-    .forEach(function (el, index) {
-      steps.push(el.id);
-    });
+      .querySelector('#' + id)
+      .querySelectorAll('.step')
+      .forEach(function (el, index) {
+        steps.push(el.id);
+      })
     if (steps.length < 1) {
       console.warn('Decision tree should have at least one step.');
     }
@@ -207,9 +207,9 @@ class DecisionTree {
   _cleanHTML() {
     // Clean HTML of all answers and remove styles.
     document.querySelectorAll('#' + this.config.id + ' .decision-tree__summary_infos *')
-    .forEach(function (element) {
-      element.remove();
-    });
+      .forEach(function (element) {
+        element.remove();
+      });
 
     document.querySelectorAll('#' + this.config.id + ' .decision-tree__summary').forEach((element) => {
       element.removeAttribute('style');
@@ -219,8 +219,8 @@ class DecisionTree {
   _handleFormSubmit(form) {
     let formData = new FormData(form);
     formData.forEach((value, key) => {
-        let varName = `decision-tree.${this.config.id}.vars.${key}`;
-        localStorage.setItem(varName, value);
+      let varName = `decision-tree.${this.config.id}.vars.${key}`;
+      localStorage.setItem(varName, value);
     });
     let nextStep = form.getAttribute('action').replace('#', '');
     this.trackAnswer(nextStep);
@@ -228,13 +228,12 @@ class DecisionTree {
 
   _filterElement(element) {
     let filters = element.getAttribute('data-dt-filter');
-    console.log(filters);
     if (!filters) return true;
 
     return filters.split(',').every(filter => {
       let [criteria, condition] = filter.split('+');
       if (criteria.startsWith('!')) {
-          return !this._evaluateCriteria(criteria.slice(1), condition);
+        return !this._evaluateCriteria(criteria.slice(1), condition);
       }
       return this._evaluateCriteria(criteria, condition);
     });
@@ -243,7 +242,6 @@ class DecisionTree {
   _evaluateCriteria(criteria, condition) {
     if (criteria.startsWith('var_')) {
       let [variable, operation, value] = criteria.slice(4).split('_');
-      console.log(variable, operation, value);
       return this._compare(localStorage.getItem(`decision-tree.${this.config.id}.vars.${variable}`), operation, value);
     } else if (criteria.startsWith('visited_')) {
       return this.storage.history.includes(criteria.slice(8));
@@ -265,25 +263,23 @@ class DecisionTree {
     }
   }
 
+  /** Show the history data. */
   _showHistory() {
     let historyElement = document.querySelector('#' + this.config.id + ' .decision-tree__history');
-    if (historyElement) {
-      historyElement.innerHTML = '<pre>' + this.storage.history.join(', ') + '</pre>';
-    }
+    historyElement.innerHTML = '<pre>' + this.storage.history.join(', ') + '</pre>';
   }
 
+  /** Show the submission data. */
   _showSubmission() {
     let submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
-    if (submissionElement) {
-      let submissions = Object.keys(localStorage)
-        .filter(key => key.startsWith(`decision-tree.${this.config.id}.vars`))
-        .reduce((acc, key) => {
-            let cleanKey = key.split('.').pop();
-            acc[cleanKey] = localStorage.getItem(key);
-            return acc;
-        }, {});
-      submissionElement.innerHTML = '<pre>' + JSON.stringify(submissions) + '</pre>';
-    }
+    let submissions = Object.keys(localStorage)
+      .filter(key => key.startsWith(`decision-tree.${this.config.id}.vars`))
+      .reduce((acc, key) => {
+        let cleanKey = key.split('.').pop();
+        acc[cleanKey] = localStorage.getItem(key);
+        return acc;
+      }, {});
+    submissionElement.innerHTML = '<pre>' + JSON.stringify(submissions) + '</pre>';
   }
 
   /**
@@ -298,7 +294,7 @@ class DecisionTree {
       // Hide all steps.
       document.querySelectorAll('#' + this.config.id + ' .step').forEach((step) => {
         this.hide(step);
-      });
+      })
 
       // Toggle footer.
       this.toggleFooter();
@@ -337,7 +333,7 @@ class DecisionTree {
       // Save the storage.
       this._saveStorage();
     } catch (e) {
-      this.hide('#' + this.config.id);
+      this.hide('#' + this.config.id)
       console.warn('Cannot activate decision tree with ID ' + this.config.id + '. Incorrect HTML structure.');
     }
   }
@@ -392,34 +388,11 @@ class DecisionTree {
    */
   filter() {
     // Loop through list of all answers.
-    document.querySelectorAll('#' + this.config.id + ' .decision-tree__summary li').forEach((info) => {
-      // decision to display will be after validation of filters
-      let show_step = true;
-      if (info.hasAttribute('data-pass-filter')) {
-        // If it has pass filter and that value is in array of answer display it or keep it displayed.
-        const pass = info.attributes['data-pass-filter'].value.split(',');
-
-        show_step = pass.every((and) => {
-          return this.is_in_history(and.trim());
-        });
-      }
-
-      if (info.hasAttribute('data-stop-filter')) {
-        // If it has disable filter and that value is in array of answers then hide it.
-        const stop = info.attributes['data-stop-filter'].value.split(',');
-
-        stop.forEach((and) => {
-          const result = this.is_in_history(and.trim());
-          if (show_step === true && result === true) {
-            show_step = false;
-          }
-        });
-      }
-
-      if (show_step === false) {
-        this.hide(info);
+    document.querySelectorAll('#' + this.config.id + ' .step-content').forEach((content) => {
+      if (this._filterElement(content)) {
+        this.show(content);
       } else {
-        this.show(info);
+        this.hide(content);
       }
     });
   }
@@ -582,11 +555,11 @@ class DecisionTree {
    */
   trackGA(path) {
     if (typeof gtag === 'function' && drupalSettings.google_analytics !== undefined) {
-      gtag('config', drupalSettings.google_analytics.account, {page_path: window.location.href + this.config.id + '/' + path});
+      gtag('config', drupalSettings.google_analytics.account, { page_path: window.location.href + this.config.id + '/' + path });
     } else if (typeof ga === 'function' && ga.getAll()[0].get('clientId') !== null && ga.getAll()[0].get('trackingId') !== null) {
       ga('create', ga.getAll()[0].get('trackingId'), {
         clientId: ga.getAll()[0].get('clientId')
-      });
+      })
       ga('send', 'pageview', window.location.href + this.config.id + '/' + path);
     }
   }
