@@ -51,6 +51,11 @@
             <h3 class="step__title">Sci-fi Books</h3>
             <div class="step__content">
                 <p>Explore our collection of science fiction novels and series.</p>
+                <ul>
+                    <li>
+                        <a class="step__answer" href="#bookshop-special">Next</a>
+                    </li>
+                </ul>
             </div>
         </div>
         <div class="step" id="bookshop-fantasy">
@@ -83,6 +88,18 @@
             </div>
         </div>
 
+        <!-- Step to Test Visited Filter -->
+        <div class="step" id="bookshop-special">
+            <h3 class="step__title">Special Recommendation</h3>
+            <div class="step__content" data-dt-filter="visited_bookshop-sci-fi">
+                <p>Because you visited the Sci-fi section, we think you'll love these exclusive Sci-fi books!</p>
+                <ul>
+                    <li>Neuromancer</li>
+                    <li>Dune</li>
+                </ul>
+            </div>
+        </div>
+
         <!-- Summary and Footer -->
         <div class="decision-tree__summary">
             <div class="decision-tree__summary_infos"></div>
@@ -96,7 +113,6 @@
     </div>
 
     <h2>Bar</h2>
-
     <div class="decision-tree" id="bar">
         <!-- Welcome Step with Form Input -->
         <div class="step" id="bar-welcome">
