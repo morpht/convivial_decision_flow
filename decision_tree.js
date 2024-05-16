@@ -148,7 +148,7 @@ class DecisionTree {
   };
 
   _showSummary() {
-    // clean HTML first.
+    // Clean HTML first.
     this._cleanHTML();
 
     const display_summary_in_step = document.querySelector('#' + this.config.id + ' #' + this.storage.active).hasAttribute('data-show-summary');
@@ -202,9 +202,12 @@ class DecisionTree {
       }
       this._showHistory();
       this._showSubmission();
+      // Show the history and submission sections
+      document.querySelector('#' + this.config.id + ' .decision-tree__history').style.display = 'block';
+      document.querySelector('#' + this.config.id + ' .decision-tree__submission').style.display = 'block';
     }
-
   }
+
 
   _cleanHTML() {
     // Clean HTML of all answers and remove styles.
@@ -357,11 +360,12 @@ class DecisionTree {
       // Hide all steps.
       document.querySelectorAll('#' + this.config.id + ' .step').forEach((step) => {
         this.hide(step);
-      })
+      });
 
       // Toggle footer.
       this.toggleFooter();
 
+      // Create a summary element if not present
       if (!document.querySelector('#' + this.config.id + ' .decision-tree__summary')) {
         // Create a new div element
         const divElement = document.createElement('div');
@@ -393,10 +397,14 @@ class DecisionTree {
       // Add class to main div for better style targeting.
       document.querySelector('#' + this.config.id).classList.add('dt-initialized');
 
+      // Hide the history and submission sections on page load
+      document.querySelector('#' + this.config.id + ' .decision-tree__history').style.display = 'none';
+      document.querySelector('#' + this.config.id + ' .decision-tree__submission').style.display = 'none';
+
       // Save the storage.
       this._saveStorage();
     } catch (e) {
-      this.hide('#' + this.config.id)
+      this.hide('#' + this.config.id);
       console.warn('Cannot activate decision tree with ID ' + this.config.id + '. Incorrect HTML structure.');
     }
   }
