@@ -38,6 +38,44 @@ Automatically generate summaries of user choices and display them in a designate
 - **History**: Display the steps the user has taken.
 - **Submission Data**: Show collected form data.
 
+### Example of Summary Divs
+
+At the end of the decision tree, you can include divs to show a summary of user choices, the history of steps taken, and submission data. This can be configured in the HTML structure:
+
+```html
+<div class="step" id="summary" data-show-summary="true">
+  <h3>Summary</h3>
+  <div class="decision-tree__summary_infos"></div>
+  <div class="decision-tree__history"></div>
+  <div class="decision-tree__submission"></div>
+</div>
+```
+
+### Complex Conditions
+
+You can define complex conditions in your decision tree using `data-dt-filter` attributes. The following examples illustrate how to use AND (`+`) and OR (`,`):
+
+- **Logical AND**: All conditions must be true.
+  ```html
+  <div class="step__content" data-dt-filter="var_age_gte_18+var_nationality_eq_japanese">
+    Content for Japanese users aged 18 or older.
+  </div>
+  ```
+
+- **Logical OR**: At least one condition must be true.
+  ```html
+  <div class="step__content" data-dt-filter="var_age_gte_18,var_nationality_eq_japanese">
+    Content for users aged 18 or older or Japanese users.
+  </div>
+  ```
+
+- **Combination of AND and OR**:
+  ```html
+  <div class="step__content" data-dt-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
+    Content for users who are either non-Japanese aged 18 or older, or Japanese aged 20 or older.
+  </div>
+  ```
+
 ## Getting Started
 
 ### Load the Required Files
