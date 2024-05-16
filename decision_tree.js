@@ -329,7 +329,7 @@ class DecisionTree {
         dtElement.textContent = submissions[key].label;
 
         let ddElement = document.createElement('dd');
-        ddElement.textContent = submissions[key].value;
+        ddElement.textContent = this._capitalizeFirstLetter(submissions[key].value);
 
         dlElement.appendChild(dtElement);
         dlElement.appendChild(ddElement);
@@ -338,6 +338,11 @@ class DecisionTree {
 
     submissionElement.innerHTML = '';
     submissionElement.appendChild(dlElement);
+  }
+
+  /** Capitalize the first letter of a string. */
+  _capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
   /**
