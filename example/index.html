@@ -15,16 +15,16 @@
     <div class="decision-tree" id="bookshop">
         <!-- Welcome Step with Form Input -->
         <div class="step" id="bookshop-welcome">
-            <h3>Welcome to Our Bookshop</h3>
-            <div class="step-content">
+            <h3 class="step__title">Welcome to Our Bookshop</h3>
+            <div class="step__content">
                 <p>So that we can help you better, please tell us a bit about your reading preferences:</p>
                 <form class="dt-form" action="#bookshop-find">
-                    <label for="purpose">What brings you here today?</label>
+                    <label class="step__question" for="purpose">What brings you here today?</label>
                     <select name="purpose" required>
                         <option value="shopping">Shopping</option>
                         <option value="education">Education</option>
                     </select>
-                    <label for="age">What is your age?</label>
+                    <label class="step__question" for="age">What is your age?</label>
                     <input type="number" name="age" placeholder="Your age" required>
                     <input type="submit" value="Continue">
                 </form>
@@ -33,8 +33,8 @@
 
         <!-- Category Selection Step -->
         <div class="step" id="bookshop-find">
-            <h3>Let's see if we can find something for you</h3>
-            <div class="step-content">
+            <h3 class="step__title">Let's see if we can find something for you</h3>
+            <div class="step__content">
                 <p>We have a wide range of topics suitable for you.</p>
                 <h4>What is your interest?</h4>
                 <ul>
@@ -48,37 +48,37 @@
 
         <!-- Detailed Steps for Each Category -->
         <div class="step" id="bookshop-sci-fi">
-            <h3>Sci-fi Books</h3>
-            <div class="step-content">
+            <h3 class="step__title">Sci-fi Books</h3>
+            <div class="step__content">
                 <p>Explore our collection of science fiction novels and series.</p>
             </div>
         </div>
         <div class="step" id="bookshop-fantasy">
-            <h3>Fantasy Books</h3>
-            <div class="step-content">
+            <h3 class="step__title">Fantasy Books</h3>
+            <div class="step__content">
                 <p>Discover worlds of magic and myth in our fantasy section.</p>
             </div>
         </div>
         <div class="step" id="bookshop-comedic-fiction">
-            <h3>Comedic Fiction</h3>
-            <div class="step-content">
+            <h3 class="step__title">Comedic Fiction</h3>
+            <div class="step__content">
                 <p>Laugh out loud with our range of comedic fiction.</p>
             </div>
         </div>
         <div class="step" id="bookshop-none">
-            <h3>Explore Other Genres</h3>
-            <div class="step-content">
+            <h3 class="step__title">Explore Other Genres</h3>
+            <div class="step__content">
                 <p>Check out other genres that might suit your taste.</p>
             </div>
         </div>
 
         <!-- Filters and Age-based Content -->
         <div class="step" id="bookshop-age-based">
-            <h3>Age-based Recommendations</h3>
-            <div class="step-content" data-dt-filter="var_age_gte_18">
+            <h3 class="step__title">Age-based Recommendations</h3>
+            <div class="step__content" data-dt-filter="var_age_gte_18">
                 <p>Since you are over 18, you might enjoy these mature reads.</p>
             </div>
-            <div class="step-content" data-dt-filter="var_age_lt_18">
+            <div class="step__content" data-dt-filter="var_age_lt_18">
                 <p>For readers under 18, we recommend these young adult novels.</p>
             </div>
         </div>
@@ -100,16 +100,17 @@
     <div class="decision-tree" id="bar">
         <!-- Welcome Step with Form Input -->
         <div class="step" id="bar-welcome">
-            <h3>Welcome to Our Bar</h3>
-            <div class="step-content">
+            <h3 class="step__title">Welcome to Our Bar</h3>
+            <div class="step__content">
                 <p>To start, please tell us your nationality and age:</p>
                 <form class="dt-form" action="#bar-age-based">
-                    <label for="nationality">Your nationality:</label>
+                    <label class="step__question" for="nationality">Your nationality:</label>
                     <select name="nationality" required>
-                        <option value="czech">Czech</option>
                         <option value="australian">Australian</option>
+                        <option value="czech">Czech</option>
+                        <option value="japanese">Japanese</option>
                     </select>
-                    <label for="age">Your age:</label>
+                    <label class="step__question" for="age">Your age:</label>
                     <input type="number" name="age" placeholder="Your age" required>
                     <input type="submit" value="Next">
                 </form>
@@ -118,16 +119,18 @@
 
         <!-- Filters and Age-based Content -->
         <div class="step" id="bar-age-based">
-            <h3>Age-based Drink Recommendations</h3>
-            <div class="step-content" data-dt-filter="var_age_gte_18">
-                <p>Since you are over 18, you might enjoy these alcoholic beverages.</p>
+            <h3 class="step__title">Age-based Drink Recommendations</h3>
+            <div class="step__content" data-dt-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
+                <p>Since you are over the legal drinking age, you might enjoy these alcoholic beverages.</p>
                 <p>What type of drink do you prefer?</p>
                 <ul>
                     <li><a class="step__answer" href="#bar-beer">Beer</a></li>
-                    <li><a class="step__answer" href="#bar-vodka">Vodka</a></li>
+                    <li data-dt-filter="var_nationality_eq_australian"><a class="step__answer" href="#bar-vodka">Vodka</a></li>
+                    <li data-dt-filter="var_nationality_eq_czech"><a class="step__answer" href="#bar-spirits">Spirits</a></li>
+                    <li data-dt-filter="var_nationality_eq_japanese"><a class="step__answer" href="#bar-sake">Sake</a></li>
                 </ul>
             </div>
-            <div class="step-content" data-dt-filter="var_age_lt_18">
+            <div class="step__content" data-dt-filter="!var_nationality_eq_japanese+var_age_lt_18,var_nationality_eq_japanese+var_age_lt_20">
                 <p>For non-alcoholic options, try water or sodas.</p>
                 <ul>
                     <li><a class="step__answer" href="#bar-water">Water</a></li>
@@ -138,27 +141,48 @@
 
         <!-- Drink Options -->
         <div class="step" id="bar-beer">
-            <h3>Beer Selection</h3>
-            <div class="step-content">
+            <h3 class="step__title">Beer Selection</h3>
+            <div class="step__content">
                 <ul>
-                    <li>Pilsner Urquell</li>
+                    <li data-dt-filter="var_nationality_eq_australian">Carlton Draught</li>
                     <li data-dt-filter="var_nationality_eq_australian">VB</li>
-                    <li>Asahi</li>
+                    <li data-dt-filter="var_nationality_eq_czech">Březňák</li>
+                    <li data-dt-filter="var_nationality_eq_czech">Starobrno</li>
+                    <li data-dt-filter="var_nationality_eq_japanese">Asahi</li>
+                    <li data-dt-filter="var_nationality_eq_japanese">Sapporo</li>
                 </ul>
             </div>
         </div>
         <div class="step" id="bar-vodka">
-            <h3>Vodka Selection</h3>
-            <div class="step-content">
+            <h3 class="step__title">Vodka Selection</h3>
+            <div class="step__content">
                 <ul>
                     <li>Smirnoff</li>
                     <li>Belvedere</li>
                 </ul>
             </div>
         </div>
+        <div class="step" id="bar-sake">
+            <h3 class="step__title">Sake Selection</h3>
+            <div class="step__content">
+                <ul>
+                    <li>Junmai-shu</li>
+                    <li>Namazake</li>
+                </ul>
+            </div>
+        </div>
+        <div class="step" id="bar-spirits">
+            <h3 class="step__title">Spirits Selection</h3>
+            <div class="step__content">
+                <ul>
+                    <li>Fernet</li>
+                    <li>Becherovka</li>
+                </ul>
+            </div>
+        </div>
         <div class="step" id="bar-water">
-            <h3>Water Selection</h3>
-            <div class="step-content">
+            <h3 class="step__title">Water Selection</h3>
+            <div class="step__content">
                 <ul>
                     <li>Still Water</li>
                     <li>Sparkling Water</li>
@@ -166,8 +190,8 @@
             </div>
         </div>
         <div class="step" id="bar-soda">
-            <h3>Soda Selection</h3>
-            <div class="step-content">
+            <h3 class="step__title">Soda Selection</h3>
+            <div class="step__content">
                 <ul>
                     <li>Pepsi</li>
                     <li>Coke</li>

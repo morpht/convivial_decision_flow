@@ -31,6 +31,7 @@ class DecisionTree {
         .forEach(function (answer) {
           if (answer.hasAttribute('href')) {
             answer.addEventListener('click', () => {
+              this.filter();
               this.trackAnswer(answer.attributes.href.value.replace('#', ''), answer.hasAttribute('data-answer-path') ? answer.attributes['data-answer-path'].value : false);
             })
           }
@@ -222,15 +223,31 @@ class DecisionTree {
     formData.forEach((value, key) => {
       let varName = `decision-tree.${this.config.id}.vars.${key}`;
       localStorage.setItem(varName, value);
+  
+      // Find the corresponding label using the name attribute
+      let label;
+      form.querySelectorAll('label').forEach(lbl => {
+        if (lbl.getAttribute('for') === key) {
+          label = lbl.textContent.trim();
+        }
+      });
+  
+      // Store the label text in localStorage if a label is found
+      if (label) {
+        localStorage.setItem(varName + '_label', label);
+      }
     });
+  
     let nextStep = form.getAttribute('action').replace('#', '');
     this.trackAnswer(nextStep);
     this.filter();
-  }
+  }  
 
   _filterElement(element) {
     let filters = element.getAttribute('data-dt-filter');
     if (!filters) return true;
+
+    console.log(filters);
 
     return filters.split(',').every(filter => {
       let [criteria, condition] = filter.split('+');
@@ -244,6 +261,8 @@ class DecisionTree {
   _evaluateCriteria(criteria, condition) {
     if (criteria.startsWith('var_')) {
       let [variable, operation, value] = criteria.slice(4).split('_');
+      console.log(variable, operation, value);
+      console.log(localStorage.getItem(`decision-tree.${this.config.id}.vars.${variable}`));
       return this._compare(localStorage.getItem(`decision-tree.${this.config.id}.vars.${variable}`), operation, value);
     } else if (criteria.startsWith('visited_')) {
       return this.storage.history.includes(criteria.slice(8));
@@ -252,8 +271,8 @@ class DecisionTree {
   }
 
   _compare(variableValue, operator, comparator) {
-    variableValue = Number(variableValue);
-    comparator = Number(comparator);
+    variableValue = variableValue;
+    comparator = comparator;
 
     console.log(variableValue, operator, comparator);
     switch (operator) {
@@ -277,15 +296,34 @@ class DecisionTree {
   _showSubmission() {
     let submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
     let submissions = Object.keys(localStorage)
-      .filter(key => key.startsWith(`decision-tree.${this.config.id}.vars`))
+      .filter(key => key.startsWith(`decision-tree.${this.config.id}.vars.`) && !key.endsWith('_label'))
       .reduce((acc, key) => {
         let cleanKey = key.split('.').pop();
-        acc[cleanKey] = localStorage.getItem(key);
+        let value = localStorage.getItem(key);
+        let label = localStorage.getItem(key + '_label');
+        acc[cleanKey] = { value, label };
         return acc;
       }, {});
-    submissionElement.innerHTML = '<pre>' + JSON.stringify(submissions) + '</pre>';
+  
+    let dlElement = document.createElement('dl');
+  
+    Object.keys(submissions).forEach(key => {
+      if (submissions[key].label) {
+        let dtElement = document.createElement('dt');
+        dtElement.textContent = submissions[key].label;
+  
+        let ddElement = document.createElement('dd');
+        ddElement.textContent = submissions[key].value;
+  
+        dlElement.appendChild(dtElement);
+        dlElement.appendChild(ddElement);
+      }
+    });
+  
+    submissionElement.innerHTML = '';
+    submissionElement.appendChild(dlElement);
   }
-
+  
   /**
    * Show the active step of the active decision tree and store it to local
    * storage.
@@ -391,15 +429,15 @@ class DecisionTree {
    * Filter results elements by start and stop parameters.
    */
   filter() {
-    // Loop through list of all answers.
-    document.querySelectorAll('#' + this.config.id + ' .step-content').forEach((content) => {
-      if (this._filterElement(content)) {
-        this.show(content);
+    // Target elements with the data-dt-filter attribute within the specific config id
+    document.querySelectorAll('#' + this.config.id + ' [data-dt-filter]').forEach((element) => {
+      if (this._filterElement(element)) {
+        this.show(element);
       } else {
-        this.hide(content);
+        this.hide(element);
       }
     });
-  }
+  }  
 
   is_in_history(filter_array) {
     return filter_array.split(' ').every((object) => {
