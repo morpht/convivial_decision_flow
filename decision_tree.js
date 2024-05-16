@@ -223,7 +223,7 @@ class DecisionTree {
     formData.forEach((value, key) => {
       let varName = `decision-tree.${this.config.id}.vars.${key}`;
       localStorage.setItem(varName, value);
-  
+
       // Find the corresponding label using the name attribute
       let label;
       form.querySelectorAll('label').forEach(lbl => {
@@ -231,38 +231,34 @@ class DecisionTree {
           label = lbl.textContent.trim();
         }
       });
-  
+
       // Store the label text in localStorage if a label is found
       if (label) {
         localStorage.setItem(varName + '_label', label);
       }
     });
-  
+
     let nextStep = form.getAttribute('action').replace('#', '');
     this.trackAnswer(nextStep);
     this.filter();
-  }  
+  }
 
   _filterElement(element) {
     let filters = element.getAttribute('data-dt-filter');
     if (!filters) return true;
-
-    console.log(filters);
-
-    return filters.split(',').every(filter => {
-      let [criteria, condition] = filter.split('+');
-      if (criteria.startsWith('!')) {
-        return !this._evaluateCriteria(criteria.slice(1), condition);
-      }
-      return this._evaluateCriteria(criteria, condition);
+    return filters.split(',').some(filter => {
+      return filter.split('+').every(criteria => {
+        if (criteria.startsWith('!')) {
+          return !this._evaluateCriteria(criteria.slice(1));
+        }
+        return this._evaluateCriteria(criteria);
+      });
     });
   }
 
-  _evaluateCriteria(criteria, condition) {
+  _evaluateCriteria(criteria) {
     if (criteria.startsWith('var_')) {
       let [variable, operation, value] = criteria.slice(4).split('_');
-      console.log(variable, operation, value);
-      console.log(localStorage.getItem(`decision-tree.${this.config.id}.vars.${variable}`));
       return this._compare(localStorage.getItem(`decision-tree.${this.config.id}.vars.${variable}`), operation, value);
     } else if (criteria.startsWith('visited_')) {
       return this.storage.history.includes(criteria.slice(8));
@@ -271,20 +267,21 @@ class DecisionTree {
   }
 
   _compare(variableValue, operator, comparator) {
-    variableValue = variableValue;
-    comparator = comparator;
+    // Ensure both variableValue and comparator are of the same type before comparison
+    if (!isNaN(variableValue)) variableValue = parseFloat(variableValue);
+    if (!isNaN(comparator)) comparator = parseFloat(comparator);
 
-    console.log(variableValue, operator, comparator);
     switch (operator) {
       case 'gt': return variableValue > comparator;
       case 'gte': return variableValue >= comparator;
       case 'lt': return variableValue < comparator;
       case 'lte': return variableValue <= comparator;
-      case 'eq': return variableValue === comparator;
+      case 'eq': return variableValue == comparator; // use == for type coercion
       case 'empty': return variableValue === '';
       default: return false;
     }
   }
+
 
   /** Show the history data. */
   _showHistory() {
@@ -304,26 +301,26 @@ class DecisionTree {
         acc[cleanKey] = { value, label };
         return acc;
       }, {});
-  
+
     let dlElement = document.createElement('dl');
-  
+
     Object.keys(submissions).forEach(key => {
       if (submissions[key].label) {
         let dtElement = document.createElement('dt');
         dtElement.textContent = submissions[key].label;
-  
+
         let ddElement = document.createElement('dd');
         ddElement.textContent = submissions[key].value;
-  
+
         dlElement.appendChild(dtElement);
         dlElement.appendChild(ddElement);
       }
     });
-  
+
     submissionElement.innerHTML = '';
     submissionElement.appendChild(dlElement);
   }
-  
+
   /**
    * Show the active step of the active decision tree and store it to local
    * storage.
@@ -437,7 +434,7 @@ class DecisionTree {
         this.hide(element);
       }
     });
-  }  
+  }
 
   is_in_history(filter_array) {
     return filter_array.split(' ').every((object) => {
