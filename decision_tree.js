@@ -282,11 +282,30 @@ class DecisionTree {
     }
   }
 
-
   /** Show the history data. */
   _showHistory() {
     let historyElement = document.querySelector('#' + this.config.id + ' .decision-tree__history');
-    historyElement.innerHTML = '<pre>' + this.storage.history.join(', ') + '</pre>';
+
+    // Create the <dl> element
+    let dlElement = document.createElement('dl');
+
+    // Create the <dt> element for the title "History"
+    let dtElement = document.createElement('dt');
+    dtElement.textContent = 'History';
+    dlElement.appendChild(dtElement);
+
+    // Map through the history and create <dd> elements for each title
+    this.storage.history.forEach(stepId => {
+      let stepElement = document.querySelector('#' + this.config.id + ' #' + stepId);
+      let titleElement = stepElement.querySelector('.step__title');
+      let ddElement = document.createElement('dd');
+      ddElement.textContent = titleElement ? titleElement.textContent.trim() : stepId;
+      dlElement.appendChild(ddElement);
+    });
+
+    // Set the innerHTML of the history element to the <dl> element
+    historyElement.innerHTML = '';
+    historyElement.appendChild(dlElement);
   }
 
   /** Show the submission data. */

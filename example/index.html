@@ -120,17 +120,22 @@
         <!-- Filters and Age-based Content -->
         <div class="step" id="bar-age-based">
             <h3 class="step__title">Age-based Drink Recommendations</h3>
-            <div class="step__content" data-dt-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
+            <div class="step__content"
+                data-dt-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
                 <p>Since you are over the legal drinking age, you might enjoy these alcoholic beverages.</p>
                 <p>What type of drink do you prefer?</p>
                 <ul>
                     <li><a class="step__answer" href="#bar-beer">Beer</a></li>
-                    <li data-dt-filter="var_nationality_eq_australian"><a class="step__answer" href="#bar-vodka">Vodka</a></li>
-                    <li data-dt-filter="var_nationality_eq_czech"><a class="step__answer" href="#bar-spirits">Spirits</a></li>
-                    <li data-dt-filter="var_nationality_eq_japanese"><a class="step__answer" href="#bar-sake">Sake</a></li>
+                    <li data-dt-filter="var_nationality_eq_australian"><a class="step__answer"
+                            href="#bar-vodka">Vodka</a></li>
+                    <li data-dt-filter="var_nationality_eq_czech"><a class="step__answer"
+                            href="#bar-spirits">Spirits</a></li>
+                    <li data-dt-filter="var_nationality_eq_japanese"><a class="step__answer" href="#bar-sake">Sake</a>
+                    </li>
                 </ul>
             </div>
-            <div class="step__content" data-dt-filter="!var_nationality_eq_japanese+var_age_lt_18,var_nationality_eq_japanese+var_age_lt_20">
+            <div class="step__content"
+                data-dt-filter="!var_nationality_eq_japanese+var_age_lt_18,var_nationality_eq_japanese+var_age_lt_20">
                 <p>For non-alcoholic options, try water or sodas.</p>
                 <ul>
                     <li><a class="step__answer" href="#bar-water">Water</a></li>
