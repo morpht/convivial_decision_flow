@@ -212,11 +212,19 @@ class DecisionTree {
       this._showHistory();
       this._showSubmission();
       // Show the history and submission sections
-      document.querySelector('#' + this.config.id + ' .decision-tree__history').style.display = 'block';
-      document.querySelector('#' + this.config.id + ' .decision-tree__submission').style.display = 'block';
+      let historyElement = document.querySelector('#' + this.config.id + ' .decision-tree__history');
+
+      if (historyElement) {
+        historyElement.style.display = 'block';
+      }
+
+      let submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
+
+      if (submissionElement) {
+        submissionElement.style.display = 'block';
+      }
     }
   }
-
 
   _cleanHTML() {
     // Clean HTML of all answers and remove styles.
@@ -315,56 +323,59 @@ class DecisionTree {
   /** Show the history data. */
   _showHistory() {
     let historyElement = document.querySelector('#' + this.config.id + ' .decision-tree__history');
+    if (historyElement) {
+      // Create the <dl> element
+      let dlElement = document.createElement('dl');
 
-    // Create the <dl> element
-    let dlElement = document.createElement('dl');
+      // Create the <dt> element for the title "History"
+      let dtElement = document.createElement('dt');
+      dtElement.textContent = 'History';
+      dlElement.appendChild(dtElement);
 
-    // Create the <dt> element for the title "History"
-    let dtElement = document.createElement('dt');
-    dtElement.textContent = 'History';
-    dlElement.appendChild(dtElement);
+      // Map through the history and create <dd> elements for each title
+      this.storage.history.forEach(stepId => {
+        if (stepId != this.config.first_step) {
+          let stepElement = document.querySelector('#' + this.config.id + ' #' + stepId);
+          let titleElement = stepElement.querySelector('.step__heading');
+          let ddElement = document.createElement('dd');
+          ddElement.textContent = titleElement ? titleElement.textContent.trim() : stepId;
+          dlElement.appendChild(ddElement);
+        }
+      });
 
-    // Map through the history and create <dd> elements for each title
-    this.storage.history.forEach(stepId => {
-      if (stepId != this.config.first_step) {
-        let stepElement = document.querySelector('#' + this.config.id + ' #' + stepId);
-        let titleElement = stepElement.querySelector('.step__heading');
-        let ddElement = document.createElement('dd');
-        ddElement.textContent = titleElement ? titleElement.textContent.trim() : stepId;
-        dlElement.appendChild(ddElement);
-      }
-    });
-
-    // Set the innerHTML of the history element to the <dl> element
-    historyElement.innerHTML = '<h3>History</h3>';
-    historyElement.appendChild(dlElement);
+      // Set the innerHTML of the history element to the <dl> element
+      historyElement.innerHTML = '<h3>History</h3>';
+      historyElement.appendChild(dlElement);
+    }
   }
 
   /** Show the submission data. */
   _showSubmission() {
     let submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
-    let submissions = this.storage.vars;
+    if (submissionElement) {
+      let submissions = this.storage.vars;
 
-    let dlElement = document.createElement('dl');
+      let dlElement = document.createElement('dl');
 
-    Object.keys(submissions).forEach(key => {
-      if (!key.endsWith('_label')) {
-        let label = submissions[key + '_label'] || key;
-        let value = submissions[key];
+      Object.keys(submissions).forEach(key => {
+        if (!key.endsWith('_label')) {
+          let label = submissions[key + '_label'] || key;
+          let value = submissions[key];
 
-        let dtElement = document.createElement('dt');
-        dtElement.textContent = label;
+          let dtElement = document.createElement('dt');
+          dtElement.textContent = label;
 
-        let ddElement = document.createElement('dd');
-        ddElement.textContent = this._capitalizeFirstLetter(value);
+          let ddElement = document.createElement('dd');
+          ddElement.textContent = this._capitalizeFirstLetter(value);
 
-        dlElement.appendChild(dtElement);
-        dlElement.appendChild(ddElement);
-      }
-    });
+          dlElement.appendChild(dtElement);
+          dlElement.appendChild(ddElement);
+        }
+      });
 
-    submissionElement.innerHTML = '<h3>Submission</h3>';
-    submissionElement.appendChild(dlElement);
+      submissionElement.innerHTML = '<h3>Submission</h3>';
+      submissionElement.appendChild(dlElement);
+    }
   }
 
   /** Capitalize the first letter of a string. */
@@ -422,8 +433,15 @@ class DecisionTree {
       document.querySelector('#' + this.config.id).classList.add('dt-initialized');
 
       // Hide the history and submission sections on page load
-      document.querySelector('#' + this.config.id + ' .decision-tree__history').style.display = 'none';
-      document.querySelector('#' + this.config.id + ' .decision-tree__submission').style.display = 'none';
+      const historyElement = document.querySelector('#' + this.config.id + ' .decision-tree__history');
+      if (historyElement) {
+        historyElement.style.display = 'none';
+      }
+
+      const submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
+      if (submissionElement) {
+        submissionElement.style.display = 'none';
+      }
 
       // Save the storage.
       this._saveStorage();

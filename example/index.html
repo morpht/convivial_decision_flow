@@ -13,109 +13,94 @@
     <h1>Examples</h1>
     <h2>Bookshop</h2>
     <div class="decision-tree" id="bookshop">
-        <!-- Welcome Step with Form Input -->
-        <div class="step" id="bookshop-welcome">
-            <h3 class="step__heading">Welcome to Our Bookshop</h3>
-            <div>
-                <p>So that we can help you better, please tell us a bit about your reading preferences:</p>
-                <form class="dt-form" action="#bookshop-find">
-                    <label class="step__question" for="purpose">What brings you here today?</label>
-                    <select name="purpose" required>
-                        <option value="shopping">Shopping</option>
-                        <option value="education">Education</option>
-                    </select>
-                    <label class="step__question" for="age">What is your age?</label>
-                    <input type="number" name="age" placeholder="Your age" required>
-                    <input type="submit" value="Continue">
-                </form>
-            </div>
+        <div class="step" id="bookshop-welcome" data-cookie="outcome=bookshop-welcome">
+            <h3 class="step__heading">Welcome to first example - Book store.</h3>
+            <p>So that we can help you better, we would like to know a little bit more about you.</p>
+            <h4 class="step__question">What brings you here today?</h4>
+            <ul>
+                <li>
+                    <a class="step__answer" href="#bookshop-find" data-answer-path="shopping">
+                        Shopping
+                    </a>
+                </li>
+                <li>
+                    <a class="step__answer" href="#bookshop-education" data-answer-path="education">
+                        Education
+                    </a>
+                </li>
+            </ul>
         </div>
-
-        <!-- Category Selection Step -->
         <div class="step" id="bookshop-find">
             <h3 class="step__heading">Let's see if we can find something for you</h3>
+            <p>We have a wide range of topics suitable for you.</p>
+            <h4 class="step__question">What is your interest?</h4>
+            <ul>
+                <li>
+                    <a class="step__answer" href="#bookshop-sci-fi" data-answer-path="sci-fi">
+                        Sci-fi
+                    </a>
+                </li>
+                <li>
+                    <a class="step__answer" href="#bookshop-fantasy" data-answer-path="fantasy">
+                        Fantasy
+                    </a>
+                </li>
+                <li>
+                    <a class="step__answer" href="#bookshop-comedic-fiction" data-answer-path="comedic-fiction">
+                        Comedic fiction
+                    </a>
+                </li>
+                <li>
+                    <a class="step__answer" href="#bookshop-none" data-answer-path="none">
+                        None of these
+                    </a>
+                </li>
+            </ul>
             <div>
-                <p>We have a wide range of topics suitable for you.</p>
-                <h4>What is your interest?</h4>
-                <ul>
-                    <li><a class="step__answer" href="#bookshop-sci-fi">Sci-fi</a></li>
-                    <li><a class="step__answer" href="#bookshop-fantasy">Fantasy</a></li>
-                    <li><a class="step__answer" href="#bookshop-comedic-fiction">Comedic fiction</a></li>
-                    <li><a class="step__answer" href="#bookshop-none">None of these</a></li>
-                </ul>
+                <p>You came here today to shop.</p>
             </div>
         </div>
-
-        <!-- Detailed Steps for Each Category -->
-        <div class="step" id="bookshop-sci-fi">
-            <h3 class="step__heading">Sci-fi Books</h3>
-            <div>
-                <p>Explore our collection of science fiction novels and series.</p>
-                <ul>
-                    <li>
-                        <a class="step__answer" href="#bookshop-special">Next</a>
-                    </li>
-                </ul>
-            </div>
+        <div class="step" id="bookshop-education" data-cookie="outcome=bookshop-education">
+            <h3 class="step__heading">Find out about the Bookstore</h3>
+            <p>You came here to find out about the bookstore. Please take a look around. We recommend that you start by
+                finding out more about us, or perhaps you would like to browse our catalog.</p>
         </div>
-        <div class="step" id="bookshop-fantasy">
-            <h3 class="step__heading">Fantasy Books</h3>
-            <div>
-                <p>Discover worlds of magic and myth in our fantasy section.</p>
-            </div>
+        <div class="step" id="bookshop-sci-fi" data-cookie="outcome=bookshop-sci-fi">
+            <h3 class="step__heading">Sci-fi</h3>
+            <p>We have a large selection of sci-fi books available for purchase. Please visit the sci-fi section of the
+                bookstore to browse the titles.</p>
         </div>
-        <div class="step" id="bookshop-comedic-fiction">
-            <h3 class="step__heading">Comedic Fiction</h3>
-            <div>
-                <p>Laugh out loud with our range of comedic fiction.</p>
-            </div>
+        <div class="step" id="bookshop-fantasy" data-cookie="outcome=bookshop-fantasy" data-pass-filter="">
+            <h3 class="step__heading">Fantasy</h3>
+            <p>We have a large range of fantasy books for purchase. Please visit the fantasy section of the bookstore to
+                browse the titles.</p>
         </div>
-        <div class="step" id="bookshop-none">
-            <h3 class="step__heading">Explore Other Genres</h3>
-            <div>
-                <p>Check out other genres that might suit your taste.</p>
-            </div>
+        <div class="step" id="bookshop-comedic-fiction" data-cookie="outcome=bookshop-comedic-fiction">
+            <h3 class="step__heading">Comedic fiction</h3>
+            <p>We have a large range of comedic fiction books for purchase. Please visit the comedic fiction section of
+                the bookstore to browse the titles.</p>
         </div>
-
-        <!-- Filters and Age-based Content -->
-        <div class="step" id="bookshop-age-based">
-            <h3 class="step__heading">Age-based Recommendations</h3>
-            <div data-dt-filter="var_age_gte_18">
-                <p>Since you are over 18, you might enjoy these mature reads.</p>
-            </div>
-            <div data-dt-filter="var_age_lt_18">
-                <p>For readers under 18, we recommend these young adult novels.</p>
-            </div>
-        </div>
-
-        <!-- Step to Test Visited Filter -->
-        <div class="step" id="bookshop-special">
-            <h3 class="step__heading">Special Recommendation</h3>
-            <div data-dt-filter="visited_bookshop-sci-fi">
-                <p>Because you visited the Sci-fi section, we think you'll love these exclusive Sci-fi books!</p>
-                <ul>
-                    <li>Neuromancer</li>
-                    <li>Dune</li>
-                </ul>
-            </div>
+        <div class="step" id="bookshop-none" data-cookie="outcome=bookshop-none">
+            <h3 class="step__heading">None of these</h3>
+            <p>None of the listed categories suits you.</p>
         </div>
 
         <!-- Summary and Footer -->
         <div class="decision-tree__summary">
             <div class="decision-tree__summary_infos"></div>
             <div class="decision-tree__history"></div>
-            <div class="decision-tree__submission"></div>
         </div>
         <div class="decision-tree__footer">
             <button class="btn btn-secondary step__button step__button--back">Back</button>
             <button class="btn btn-secondary step__button step__button--restart">Restart</button>
         </div>
     </div>
+    <br>
 
     <h2>Bar</h2>
     <div class="decision-tree" id="bar">
         <!-- Welcome Step with Form Input -->
-        <div class="step" id="bar-welcome">
+        <div class="step" id="bar-welcome" data-cookie="outcome=bar-welcome">
             <h3 class="step__heading">Welcome to Our Bar</h3>
             <div>
                 <p>To start, please tell us your nationality and age:</p>
@@ -134,34 +119,34 @@
         </div>
 
         <!-- Filters and Age-based Content -->
-        <div class="step" id="bar-age-based">
+        <div class="step" id="bar-age-based" data-cookie="outcome=bar-age-based">
             <h3 class="step__heading">Age-based Drink Recommendations</h3>
-            <div  
+            <div
                 data-dt-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
                 <p>Since you are over the legal drinking age, you might enjoy these alcoholic beverages.</p>
                 <p>What type of drink do you prefer?</p>
                 <ul>
-                    <li><a class="step__answer" href="#bar-beer">Beer</a></li>
-                    <li data-dt-filter="var_nationality_eq_australian"><a class="step__answer"
-                            href="#bar-vodka">Vodka</a></li>
-                    <li data-dt-filter="var_nationality_eq_czech"><a class="step__answer"
-                            href="#bar-spirits">Spirits</a></li>
-                    <li data-dt-filter="var_nationality_eq_japanese"><a class="step__answer" href="#bar-sake">Sake</a>
+                    <li><a class="step__answer" href="#bar-beer" data-answer-path="beer">Beer</a></li>
+                    <li data-dt-filter="var_nationality_eq_australian"><a class="step__answer" href="#bar-vodka"
+                            data-answer-path="vodka">Vodka</a></li>
+                    <li data-dt-filter="var_nationality_eq_czech"><a class="step__answer" href="#bar-spirits"
+                            data-answer-path="spirits">Spirits</a></li>
+                    <li data-dt-filter="var_nationality_eq_japanese"><a class="step__answer" href="#bar-sake"
+                            data-answer-path="sake">Sake</a>
                     </li>
                 </ul>
             </div>
-            <div  
-                data-dt-filter="!var_nationality_eq_japanese+var_age_lt_18,var_nationality_eq_japanese+var_age_lt_20">
+            <div data-dt-filter="!var_nationality_eq_japanese+var_age_lt_18,var_nationality_eq_japanese+var_age_lt_20">
                 <p>For non-alcoholic options, try water or sodas.</p>
                 <ul>
-                    <li><a class="step__answer" href="#bar-water">Water</a></li>
-                    <li><a class="step__answer" href="#bar-soda">Soda</a></li>
+                    <li><a class="step__answer" href="#bar-water" data-answer-path="water">Water</a></li>
+                    <li><a class="step__answer" href="#bar-soda" data-answer-path="soda">Soda</a></li>
                 </ul>
             </div>
         </div>
 
         <!-- Drink Options -->
-        <div class="step" id="bar-beer">
+        <div class="step" id="bar-beer" data-cookie="outcome=bar-beer">
             <h3 class="step__heading">Beer Selection</h3>
             <div>
                 <ul>
@@ -174,8 +159,8 @@
                 </ul>
             </div>
         </div>
-        <div class="step" id="bar-vodka">
-            <h3 class="step__heading">Vodka Selection</h3>
+        <div class="step" id="bar-vodka" data-cookie="outcome=bar-vodka">
+            <h3 class=" step__heading">Vodka Selection</h3>
             <div>
                 <ul>
                     <li>Smirnoff</li>
@@ -183,7 +168,7 @@
                 </ul>
             </div>
         </div>
-        <div class="step" id="bar-sake">
+        <div class="step" id="bar-sake" data-cookie="outcome=bar-sake">
             <h3 class="step__heading">Sake Selection</h3>
             <div>
                 <ul>
@@ -192,7 +177,7 @@
                 </ul>
             </div>
         </div>
-        <div class="step" id="bar-spirits">
+        <div class="step" id="bar-spirits" data-cookie="outcome=bar-spirits">
             <h3 class="step__heading">Spirits Selection</h3>
             <div>
                 <ul>
@@ -201,7 +186,7 @@
                 </ul>
             </div>
         </div>
-        <div class="step" id="bar-water">
+        <div class="step" id="bar-water" data-cookie="outcome=bar-water">
             <h3 class="step__heading">Water Selection</h3>
             <div>
                 <ul>
@@ -210,7 +195,7 @@
                 </ul>
             </div>
         </div>
-        <div class="step" id="bar-soda">
+        <div class="step" id="bar-soda" data-cookie="outcome=bar-soda">
             <h3 class="step__heading">Soda Selection</h3>
             <div>
                 <ul>
