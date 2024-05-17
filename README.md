@@ -57,21 +57,21 @@ You can define complex conditions in your decision tree using `data-dt-filter` a
 
 - **Logical AND**: All conditions must be true.
   ```html
-  <div class="step__content" data-dt-filter="var_age_gte_18+var_nationality_eq_japanese">
+  <div data-dt-filter="var_age_gte_18+var_nationality_eq_japanese">
     Content for Japanese users aged 18 or older.
   </div>
   ```
 
 - **Logical OR**: At least one condition must be true.
   ```html
-  <div class="step__content" data-dt-filter="var_age_gte_18,var_nationality_eq_japanese">
+  <div data-dt-filter="var_age_gte_18,var_nationality_eq_japanese">
     Content for users aged 18 or older or Japanese users.
   </div>
   ```
 
 - **Combination of AND and OR**:
   ```html
-  <div class="step__content" data-dt-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
+  <div data-dt-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
     Content for users who are either non-Japanese aged 18 or older, or Japanese aged 20 or older.
   </div>
   ```

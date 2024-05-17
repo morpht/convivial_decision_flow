@@ -108,11 +108,19 @@ class DecisionTree {
     let storage = JSON.parse(localStorage.getItem(namespace)) || {};
     if (storage[id] !== undefined) {
       storage = this._validateHistory(storage);
+      if (!storage[id].vars) {
+        storage[id].vars = {};
+      }
+      this.storage = storage[id];  // Initialize the local storage object
       return storage[id];
     }
-    return {
-      first_step: this.config.first_step, active: this.config.first_step, history: [this.config.first_step]
+    this.storage = {
+      first_step: this.config.first_step,
+      active: this.config.first_step,
+      history: [this.config.first_step],
+      vars: {}
     };
+    return this.storage;
   }
 
   /**
@@ -123,6 +131,7 @@ class DecisionTree {
     let storage = JSON.parse(localStorage.getItem(namespace)) || {};
     storage[this.config.id] = this.storage;
     localStorage.setItem(namespace, JSON.stringify(storage));
+    this.storage = storage[this.config.id];  // Refresh the local storage object
   }
 
   /**
@@ -223,9 +232,10 @@ class DecisionTree {
 
   _handleFormSubmit(form) {
     let formData = new FormData(form);
+    let vars = {};
+
     formData.forEach((value, key) => {
-      let varName = `decision-tree.${this.config.id}.vars.${key}`;
-      localStorage.setItem(varName, value);
+      vars[key] = value;
 
       // Find the corresponding label using the name attribute
       let label;
@@ -235,11 +245,28 @@ class DecisionTree {
         }
       });
 
-      // Store the label text in localStorage if a label is found
+      // Store the label text in vars if a label is found
       if (label) {
-        localStorage.setItem(varName + '_label', label);
+        vars[key + '_label'] = label;
       }
     });
+
+    let namespace = `decision-tree.${this.config.id}`;
+    let storage = JSON.parse(localStorage.getItem(namespace)) || {};
+    if (!storage[this.config.id]) {
+      storage[this.config.id] = {
+        first_step: this.config.first_step,
+        active: this.config.first_step,
+        history: [this.config.first_step],
+        vars: {}
+      };
+    }
+
+    // Update the vars array in the storage object
+    storage[this.config.id].vars = { ...storage[this.config.id].vars, ...vars };
+    localStorage.setItem(namespace, JSON.stringify(storage));
+
+    this.storage = storage[this.config.id];  // Refresh the local storage object
 
     let nextStep = form.getAttribute('action').replace('#', '');
     this.trackAnswer(nextStep);
@@ -262,7 +289,7 @@ class DecisionTree {
   _evaluateCriteria(criteria) {
     if (criteria.startsWith('var_')) {
       let [variable, operation, value] = criteria.slice(4).split('_');
-      return this._compare(localStorage.getItem(`decision-tree.${this.config.id}.vars.${variable}`), operation, value);
+      return this._compare(this.storage.vars[variable], operation, value);
     } else if (criteria.startsWith('visited_')) {
       return this.storage.history.includes(criteria.slice(8));
     }
@@ -300,46 +327,41 @@ class DecisionTree {
     // Map through the history and create <dd> elements for each title
     this.storage.history.forEach(stepId => {
       let stepElement = document.querySelector('#' + this.config.id + ' #' + stepId);
-      let titleElement = stepElement.querySelector('.step__title');
+      let titleElement = stepElement.querySelector('.step__heading');
       let ddElement = document.createElement('dd');
       ddElement.textContent = titleElement ? titleElement.textContent.trim() : stepId;
       dlElement.appendChild(ddElement);
     });
 
     // Set the innerHTML of the history element to the <dl> element
-    historyElement.innerHTML = '';
+    historyElement.innerHTML = '<h3>History</h3>';
     historyElement.appendChild(dlElement);
   }
 
   /** Show the submission data. */
   _showSubmission() {
     let submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
-    let submissions = Object.keys(localStorage)
-      .filter(key => key.startsWith(`decision-tree.${this.config.id}.vars.`) && !key.endsWith('_label'))
-      .reduce((acc, key) => {
-        let cleanKey = key.split('.').pop();
-        let value = localStorage.getItem(key);
-        let label = localStorage.getItem(key + '_label');
-        acc[cleanKey] = { value, label };
-        return acc;
-      }, {});
+    let submissions = this.storage.vars;
 
     let dlElement = document.createElement('dl');
 
     Object.keys(submissions).forEach(key => {
-      if (submissions[key].label) {
+      if (!key.endsWith('_label')) {
+        let label = submissions[key + '_label'] || key;
+        let value = submissions[key];
+
         let dtElement = document.createElement('dt');
-        dtElement.textContent = submissions[key].label;
+        dtElement.textContent = label;
 
         let ddElement = document.createElement('dd');
-        ddElement.textContent = this._capitalizeFirstLetter(submissions[key].value);
+        ddElement.textContent = this._capitalizeFirstLetter(value);
 
         dlElement.appendChild(dtElement);
         dlElement.appendChild(ddElement);
       }
     });
 
-    submissionElement.innerHTML = '';
+    submissionElement.innerHTML = '<h3>Submission</h3>';
     submissionElement.appendChild(dlElement);
   }
 
