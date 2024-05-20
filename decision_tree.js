@@ -484,7 +484,7 @@ class DecisionTree {
         elem = document.querySelector(elem);
       }
       if (elem && elem.nodeType) {
-        elem.style.display = 'block';
+        elem.style.display = 'revert';
         return true;
       }
     } catch (e) {
