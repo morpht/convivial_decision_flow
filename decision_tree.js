@@ -558,8 +558,10 @@ class DecisionTree {
     // Make the next step as active.
     this.storage.active = nextStep;
 
-    // Track history.
-    this.storage.history.push(this.storage.active);
+    // Track history only if the step is not already in history.
+    if (!this.storage.history.includes(this.storage.active)) {
+      this.storage.history.push(this.storage.active);
+    }
 
     // Save the storage.
     this._saveStorage(this.config.id);
