@@ -327,18 +327,18 @@ class DecisionTree {
       // Create the <dl> element
       let dlElement = document.createElement('dl');
 
-      // Create the <dt> element for the title "History"
-      let dtElement = document.createElement('dt');
-      dtElement.textContent = 'History';
-      dlElement.appendChild(dtElement);
-
       // Map through the history and create <dd> elements for each title
       this.storage.history.forEach(stepId => {
         if (stepId != this.config.first_step) {
           let stepElement = document.querySelector('#' + this.config.id + ' #' + stepId);
+          let questionElement = stepElement.querySelector('.step__question');
+          let dtElement = document.createElement('dt');
+          dtElement.textContent = questionElement ? questionElement.textContent.trim() : '';
+          dlElement.appendChild(dtElement);
+
           let titleElement = stepElement.querySelector('.step__heading');
           let ddElement = document.createElement('dd');
-          ddElement.textContent = titleElement ? titleElement.textContent.trim() : stepId;
+          ddElement.textContent = titleElement ? titleElement.textContent.trim() : '';
           dlElement.appendChild(ddElement);
         }
       });

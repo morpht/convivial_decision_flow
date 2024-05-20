@@ -120,11 +120,11 @@
 
         <!-- Filters and Age-based Content -->
         <div class="step" id="bar-age-based" data-cookie="outcome=bar-age-based">
-            <h3 class="step__heading">Age-based Drink Recommendations</h3>
+            <h3>Age-based Drink Recommendations</h3>
             <div
                 data-dt-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
                 <p>Since you are over the legal drinking age, you might enjoy these alcoholic beverages.</p>
-                <p>What type of drink do you prefer?</p>
+                <p class="step__question">What type of drink do you prefer?</p>
                 <ul>
                     <li><a class="step__answer" href="#bar-beer" data-answer-path="beer">Beer</a></li>
                     <li data-dt-filter="var_nationality_eq_australian"><a class="step__answer" href="#bar-vodka"
@@ -147,7 +147,7 @@
 
         <!-- Drink Options -->
         <div class="step" id="bar-beer" data-cookie="outcome=bar-beer">
-            <h3 class="step__heading">Beer Selection</h3>
+            <h3 class="step__heading">Beer</h3>
             <div>
                 <ul>
                     <li data-dt-filter="var_nationality_eq_australian">Carlton Draught</li>
@@ -160,7 +160,7 @@
             </div>
         </div>
         <div class="step" id="bar-vodka" data-cookie="outcome=bar-vodka">
-            <h3 class=" step__heading">Vodka Selection</h3>
+            <h3 class=" step__heading">Vodka</h3>
             <div>
                 <ul>
                     <li>Smirnoff</li>
