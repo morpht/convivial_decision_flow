@@ -69,7 +69,7 @@ class DecisionTree {
       .querySelectorAll('.step')
       .forEach(function (el, index) {
         steps.push(el.id);
-      })
+      });
     if (steps.length < 1) {
       console.warn('Decision tree should have at least one step.');
     }
@@ -82,7 +82,7 @@ class DecisionTree {
    */
   _validateHistory(storage) {
     // Reset history if it has legacy data/data which does not exist in DOM.
-    const history = storage[this.config.id].history ?? '';
+    const history = storage.history ?? '';
     const steps = this.config.steps ? this.config.steps : this._loadSteps(this.config.id);
 
     if (history.length > 0 && steps.length > 0) {
@@ -90,8 +90,8 @@ class DecisionTree {
         return steps.indexOf(val) !== -1;
       });
       if (valid === false) {
-        storage[this.config.id].history = [this.config.first_step];
-        storage[this.config.id].active = this.config.first_step;
+        storage.history = [this.config.first_step];
+        storage.active = this.config.first_step;
         this.storage = storage;
         this._saveStorage();
       }
@@ -106,13 +106,13 @@ class DecisionTree {
   _loadStorage(id) {
     let namespace = `decision-tree.${id}`;
     let storage = JSON.parse(localStorage.getItem(namespace)) || {};
-    if (storage[id] !== undefined) {
+    if (Object.keys(storage).length !== 0) {
       storage = this._validateHistory(storage);
-      if (!storage[id].vars) {
-        storage[id].vars = {};
+      if (!storage.vars) {
+        storage.vars = {};
       }
-      this.storage = storage[id];  // Initialize the local storage object
-      return storage[id];
+      this.storage = storage;  // Initialize the local storage object
+      return storage;
     }
     this.storage = {
       first_step: this.config.first_step,
@@ -129,9 +129,9 @@ class DecisionTree {
   _saveStorage() {
     let namespace = `decision-tree.${this.config.id}`;
     let storage = JSON.parse(localStorage.getItem(namespace)) || {};
-    storage[this.config.id] = this.storage;
+    storage = this.storage;
     localStorage.setItem(namespace, JSON.stringify(storage));
-    this.storage = storage[this.config.id];  // Refresh the local storage object
+    this.storage = storage;  // Refresh the local storage object
   }
 
   /**
@@ -154,7 +154,7 @@ class DecisionTree {
         console.warn('One of your answers in decision tree id ' + id + ' does not have data-answer-path filled.');
       }
     });
-  };
+  }
 
   _showSummary() {
     // Clean HTML first.
@@ -260,21 +260,18 @@ class DecisionTree {
     });
 
     let namespace = `decision-tree.${this.config.id}`;
-    let storage = JSON.parse(localStorage.getItem(namespace)) || {};
-    if (!storage[this.config.id]) {
-      storage[this.config.id] = {
-        first_step: this.config.first_step,
-        active: this.config.first_step,
-        history: [this.config.first_step],
-        vars: {}
-      };
-    }
+    let storage = JSON.parse(localStorage.getItem(namespace)) || {
+      first_step: this.config.first_step,
+      active: this.config.first_step,
+      history: [this.config.first_step],
+      vars: {}
+    };
 
     // Update the vars array in the storage object
-    storage[this.config.id].vars = { ...storage[this.config.id].vars, ...vars };
+    storage.vars = { ...storage.vars, ...vars };
     localStorage.setItem(namespace, JSON.stringify(storage));
 
-    this.storage = storage[this.config.id];  // Refresh the local storage object
+    this.storage = storage;  // Refresh the local storage object
 
     let nextStep = form.getAttribute('action').replace('#', '');
     this.trackAnswer(nextStep);
@@ -447,7 +444,7 @@ class DecisionTree {
       this._saveStorage();
     } catch (e) {
       this.hide('#' + this.config.id);
-      console.warn('Cannot activate decision tree with ID ' + this.config.id + '. Incorrect HTML structure.');
+      console.warn('Cannot activate decision tree with ID ' + this.config.id + '. Incorrect HTML structure.', e);
     }
   }
 
@@ -558,7 +555,7 @@ class DecisionTree {
     // Make the next step as active.
     this.storage.active = nextStep;
 
-    // Track history only if the step is not already in history.
+    // Prevent duplicate entries in history
     if (!this.storage.history.includes(this.storage.active)) {
       this.storage.history.push(this.storage.active);
     }
@@ -674,7 +671,7 @@ class DecisionTree {
     } else if (typeof ga === 'function' && ga.getAll()[0].get('clientId') !== null && ga.getAll()[0].get('trackingId') !== null) {
       ga('create', ga.getAll()[0].get('trackingId'), {
         clientId: ga.getAll()[0].get('clientId')
-      })
+      });
       ga('send', 'pageview', window.location.href + this.config.id + '/' + path);
     }
   }
