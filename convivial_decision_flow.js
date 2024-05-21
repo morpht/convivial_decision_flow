@@ -1,5 +1,5 @@
 /**
- * Class representing a Decision tree.
+ * Class representing a Convivial decision flow.
  */
 class DecisionTree {
   'use strict';
@@ -23,7 +23,7 @@ class DecisionTree {
 
       // Load all the steps available in DOM.
       this.storage = this._loadStorage(id);
-      // Activate the decision tree.
+      // Activate the convivial decision flow.
       this.activate();
       this.initializeForms();  // Ensure forms are initialized after activation
       // Track answer.
@@ -54,13 +54,13 @@ class DecisionTree {
       localStorage.removeItem(test);
       return true;
     } catch (e) {
-      console.log('Decision tree will not work optimally because the browser local storage is not enabled or accessible.');
+      console.log('Convivial decision flow will not work optimally because the browser local storage is not enabled or accessible.');
       return false;
     }
   }
 
   /**
-   * Load all the steps of the active decision tree into config.
+   * Load all the steps of the active convivial decision flow into config.
    */
   _loadSteps(id) {
     const steps = [];
@@ -71,14 +71,14 @@ class DecisionTree {
         steps.push(el.id);
       });
     if (steps.length < 1) {
-      console.warn('Decision tree should have at least one step.');
+      console.warn('Convivial decision flow should have at least one step.');
     }
 
     return steps;
   }
 
   /**
-   * Validate the history of the active decision tree.
+   * Validate the history of the active convivial decision flow.
    */
   _validateHistory(storage) {
     // Reset history if it has legacy data/data which does not exist in DOM.
@@ -101,10 +101,10 @@ class DecisionTree {
   }
 
   /**
-   * Load the active decision tree from local storage.
+   * Load the active convivial decision flow from local storage.
    */
   _loadStorage(id) {
-    let namespace = `decision-tree.${id}`;
+    let namespace = `convivial-decision-flow.${id}`;
     let storage = JSON.parse(localStorage.getItem(namespace)) || {};
     if (Object.keys(storage).length !== 0) {
       storage = this._validateHistory(storage);
@@ -124,10 +124,10 @@ class DecisionTree {
   }
 
   /**
-   * Save the active decision tree to local storage.
+   * Save the active convivial decision flow to local storage.
    */
   _saveStorage() {
-    let namespace = `decision-tree.${this.config.id}`;
+    let namespace = `convivial-decision-flow.${this.config.id}`;
     let storage = JSON.parse(localStorage.getItem(namespace)) || {};
     storage = this.storage;
     localStorage.setItem(namespace, JSON.stringify(storage));
@@ -141,17 +141,17 @@ class DecisionTree {
     const steps = document.querySelector('#' + id).querySelectorAll('.step');
     steps.forEach(function (el, index) {
       if (!el.hasAttribute('id')) {
-        console.warn('One of your steps in decision tree with ID ' + id + ' does not have ID element filled.');
+        console.warn('One of your steps in convivial decision flow with ID ' + id + ' does not have ID element filled.');
       }
     });
 
     // Every answer must have href and should have a data-answer-path.
     document.querySelector('#' + id).querySelectorAll('.step__answer').forEach(function (el, index) {
       if (!el.hasAttribute('href')) {
-        console.warn('One of your answers in decision tree id ' + id + ' does not have href filled.');
+        console.warn('One of your answers in convivial decision flow id ' + id + ' does not have href filled.');
       }
       if (!el.hasAttribute('data-answer-path')) {
-        console.warn('One of your answers in decision tree id ' + id + ' does not have data-answer-path filled.');
+        console.warn('One of your answers in convivial decision flow id ' + id + ' does not have data-answer-path filled.');
       }
     });
   }
@@ -172,7 +172,7 @@ class DecisionTree {
 
     if (furtherQuestions === 0 || furtherQuestions == null || display_summary_in_step) {
       // We are displaying summary in this step.
-      this.show('#' + this.config.id + ' .decision-tree__summary');
+      this.show('#' + this.config.id + ' .convivial-decision-flow__summary');
 
       // Show step info.
       let infoHTML = '';
@@ -187,15 +187,15 @@ class DecisionTree {
         });
 
         // Append info html into the step info extra.
-        const summary_element = document.querySelector('#' + this.config.id + ' .decision-tree__summary');
+        const summary_element = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__summary');
         if (summary_element && summary_element.nodeType) {
           // In case of having infos element defined.
-          if (summary_element.querySelector('.decision-tree__summary_infos') !== null) {
-            summary_element.querySelector('.decision-tree__summary_infos').innerHTML = infoHTML;
+          if (summary_element.querySelector('.convivial-decision-flow__summary_infos') !== null) {
+            summary_element.querySelector('.convivial-decision-flow__summary_infos').innerHTML = infoHTML;
           } else {
             const divElement = document.createElement('div');
-            // Add the class 'decision-tree__summary_infos' to the div element.
-            divElement.classList.add('decision-tree__summary_infos');
+            // Add the class 'convivial-decision-flow__summary_infos' to the div element.
+            divElement.classList.add('convivial-decision-flow__summary_infos');
             // Set the innerHTML of the div element to the HTML string.
             divElement.innerHTML = infoHTML;
             // Insert the div element before the target element.
@@ -204,21 +204,21 @@ class DecisionTree {
             this.filter();
           }
         } else {
-          console.warn('Your decision tree with ID ' + this.config.id + ' does not have element with class decision-tree__summary.');
+          console.warn('Your convivial decision flow with ID ' + this.config.id + ' does not have element with class convivial-decision-flow__summary.');
         }
       } else {
-        this.hide('#' + this.config.id + ' .decision-tree__summary');
+        this.hide('#' + this.config.id + ' .convivial-decision-flow__summary');
       }
       this._showHistory();
       this._showSubmission();
       // Show the history and submission sections
-      let historyElement = document.querySelector('#' + this.config.id + ' .decision-tree__history');
+      let historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
 
       if (historyElement) {
         historyElement.style.display = 'block';
       }
 
-      let submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
+      let submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
 
       if (submissionElement) {
         submissionElement.style.display = 'block';
@@ -228,12 +228,12 @@ class DecisionTree {
 
   _cleanHTML() {
     // Clean HTML of all answers and remove styles.
-    document.querySelectorAll('#' + this.config.id + ' .decision-tree__summary_infos *')
+    document.querySelectorAll('#' + this.config.id + ' .convivial-decision-flow__summary_infos *')
       .forEach(function (element) {
         element.remove();
       });
 
-    document.querySelectorAll('#' + this.config.id + ' .decision-tree__summary').forEach((element) => {
+    document.querySelectorAll('#' + this.config.id + ' .convivial-decision-flow__summary').forEach((element) => {
       element.removeAttribute('style');
     });
   }
@@ -259,7 +259,7 @@ class DecisionTree {
       }
     });
 
-    let namespace = `decision-tree.${this.config.id}`;
+    let namespace = `convivial-decision-flow.${this.config.id}`;
     let storage = JSON.parse(localStorage.getItem(namespace)) || {
       first_step: this.config.first_step,
       active: this.config.first_step,
@@ -319,7 +319,7 @@ class DecisionTree {
 
   /** Show the history data. */
   _showHistory() {
-    let historyElement = document.querySelector('#' + this.config.id + ' .decision-tree__history');
+    let historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
     if (historyElement) {
       // Create the <dl> element
       let dlElement = document.createElement('dl');
@@ -348,7 +348,7 @@ class DecisionTree {
 
   /** Show the submission data. */
   _showSubmission() {
-    let submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
+    let submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
     if (submissionElement) {
       let submissions = this.storage.vars;
 
@@ -381,7 +381,7 @@ class DecisionTree {
   }
 
   /**
-   * Show the active step of the active decision tree and store it to local
+   * Show the active step of the active convivial decision flow and store it to local
    * storage.
    */
   activate() {
@@ -398,13 +398,13 @@ class DecisionTree {
       this.toggleFooter();
 
       // Create a summary element if not present
-      if (!document.querySelector('#' + this.config.id + ' .decision-tree__summary')) {
+      if (!document.querySelector('#' + this.config.id + ' .convivial-decision-flow__summary')) {
         // Create a new div element
         const divElement = document.createElement('div');
-        // Add the class 'decision-tree__summary' to the div element
-        divElement.classList.add('decision-tree__summary');
+        // Add the class 'convivial-decision-flow__summary' to the div element
+        divElement.classList.add('convivial-decision-flow__summary');
         // Insert the div element before the target element
-        document.querySelector('#' + this.config.id + ' .decision-tree__footer').prepend(divElement);
+        document.querySelector('#' + this.config.id + ' .convivial-decision-flow__footer').prepend(divElement);
       }
 
       // Load current step.
@@ -417,12 +417,12 @@ class DecisionTree {
       this.filter();
 
       // Track back button.
-      document.querySelector('#' + this.config.id + ' .decision-tree__footer .step__button--back').onclick = () => {
+      document.querySelector('#' + this.config.id + ' .convivial-decision-flow__footer .step__button--back').onclick = () => {
         this.trackBackButton();
       };
 
       // Track restart button.
-      document.querySelector('#' + this.config.id + ' .decision-tree__footer .step__button--restart').onclick = () => {
+      document.querySelector('#' + this.config.id + ' .convivial-decision-flow__footer .step__button--restart').onclick = () => {
         this.trackRestartButton();
       };
 
@@ -430,12 +430,12 @@ class DecisionTree {
       document.querySelector('#' + this.config.id).classList.add('dt-initialized');
 
       // Hide the history and submission sections on page load
-      const historyElement = document.querySelector('#' + this.config.id + ' .decision-tree__history');
+      const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
       if (historyElement) {
         historyElement.style.display = 'none';
       }
 
-      const submissionElement = document.querySelector('#' + this.config.id + ' .decision-tree__submission');
+      const submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
       if (submissionElement) {
         submissionElement.style.display = 'none';
       }
@@ -444,7 +444,7 @@ class DecisionTree {
       this._saveStorage();
     } catch (e) {
       this.hide('#' + this.config.id);
-      console.warn('Cannot activate decision tree with ID ' + this.config.id + '. Incorrect HTML structure.', e);
+      console.warn('Cannot activate convivial decision flow with ID ' + this.config.id + '. Incorrect HTML structure.', e);
     }
   }
 
@@ -470,7 +470,7 @@ class DecisionTree {
         return true;
       }
     } catch (e) {
-      console.warn('Please check decision tree with ID ' + this.config.id + '. Incorrect HTML structure.');
+      console.warn('Please check convivial decision flow with ID ' + this.config.id + '. Incorrect HTML structure.');
     }
     return false;
   }
@@ -488,7 +488,7 @@ class DecisionTree {
         return true;
       }
     } catch (e) {
-      console.warn('Please check decision tree ' + this.config.id + '. Incorrect HTML structure.');
+      console.warn('Please check convivial decision flow ' + this.config.id + '. Incorrect HTML structure.');
     }
     return false;
   }
@@ -514,23 +514,23 @@ class DecisionTree {
   }
 
   /**
-   * Hide the active decision tree back and restart button if its first step.
+   * Hide the active convivial decision flow back and restart button if its first step.
    */
   toggleFooter() {
-    if (!document.querySelector('#' + this.config.id + ' .decision-tree__footer')) {
+    if (!document.querySelector('#' + this.config.id + ' .convivial-decision-flow__footer')) {
       // Create a new div element.
       const divElement = document.createElement('div');
-      // Add the class 'decision-tree__footer' to the div element.
-      divElement.classList.add('decision-tree__footer');
+      // Add the class 'convivial-decision-flow__footer' to the div element.
+      divElement.classList.add('convivial-decision-flow__footer');
       // Set the innerHTML of the div element to the HTML string.
       divElement.innerHTML = '<button class=\'step__button step__button--back\'>Back</button>\n<button class=\'step__button step__button--restart\'>Restart</button>';
       // Insert the div element before the target element.
       document.querySelector('#' + this.config.id).appendChild(divElement);
     }
     if (this.storage.history && this.storage.history.length > 1) {
-      this.show('#' + this.config.id + ' .decision-tree__footer');
+      this.show('#' + this.config.id + ' .convivial-decision-flow__footer');
     } else {
-      this.hide('#' + this.config.id + ' .decision-tree__footer');
+      this.hide('#' + this.config.id + ' .convivial-decision-flow__footer');
     }
   }
 
@@ -694,12 +694,12 @@ class DecisionTree {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-  // Initialize the decision tree object for all decision trees.
-  document.querySelectorAll('.decision-tree').forEach(function (el) {
+  // Initialize the convivial decision flow object for all convivial decision flows.
+  document.querySelectorAll('.convivial-decision-flow').forEach(function (el) {
     if (el.hasAttribute('id')) {
       new DecisionTree(el.id);
     } else {
-      console.warn('Decision tree does not have ID.');
+      console.warn('Convivial decision flow does not have ID.');
     }
   });
 }, false);

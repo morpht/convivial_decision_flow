@@ -1,15 +1,16 @@
 {
-  "name": "decision_tree",
+  "name": "convivial_decision_flow",
   "version": "0.1.4",
-  "description": "Decision tree library.",
-  "main": "decision_tree.js",
+  "description": "Convivial decision flow library.",
+  "main": "convivial_decision_flow.js",
   "scripts": {},
   "author": "Morpht <murray@morpht.com> (https://www.morpht.com)",
   "license": "MIT",
   "keywords": [
-    "decision_tree",
-    "decisiontree",
-    "decision-tree",
+    "convivial_decision_flow",
+    "convivialdecisionflow",
+    "convivial-decision-flow",
+    "convivial",
     "vanilla",
     "vanilla-js"
   ],

@@ -4,15 +4,15 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Decision Tree HTML Example</title>
+    <title>Convivial Decision Flow HTML Example</title>
     <link rel="stylesheet" type="text/css" href="../style.css">
-    <script type="text/javascript" src="../decision_tree.js" defer></script>
+    <script type="text/javascript" src="../convivial_decision_flow.js" defer></script>
 </head>
 
 <body>
     <h1>Examples</h1>
     <h2>Bookshop</h2>
-    <div class="decision-tree" id="bookshop">
+    <div class="convivial-decision-flow" id="bookshop">
         <div class="step" id="bookshop-welcome" data-cookie="outcome=bookshop-welcome">
             <h3 class="step__heading">Welcome to first example - Book store.</h3>
             <p>So that we can help you better, we would like to know a little bit more about you.</p>
@@ -86,11 +86,11 @@
         </div>
 
         <!-- Summary and Footer -->
-        <div class="decision-tree__summary">
-            <div class="decision-tree__summary_infos"></div>
-            <div class="decision-tree__history"></div>
+        <div class="convivial-decision-flow__summary">
+            <div class="convivial-decision-flow__summary_infos"></div>
+            <div class="convivial-decision-flow__history"></div>
         </div>
-        <div class="decision-tree__footer">
+        <div class="convivial-decision-flow__footer">
             <button class="btn btn-secondary step__button step__button--back">Back</button>
             <button class="btn btn-secondary step__button step__button--restart">Restart</button>
         </div>
@@ -98,7 +98,7 @@
     <br>
 
     <h2>Bar</h2>
-    <div class="decision-tree" id="bar">
+    <div class="convivial-decision-flow" id="bar">
         <!-- Welcome Step with Form Input -->
         <div class="step" id="bar-welcome" data-cookie="outcome=bar-welcome">
             <h3 class="step__heading">Welcome to Our Bar</h3>
@@ -206,25 +206,25 @@
         </div>
 
         <!-- Summary and Footer -->
-        <div class="decision-tree__summary">
-            <div class="decision-tree__summary_infos"></div>
-            <div class="decision-tree__history"></div>
-            <div class="decision-tree__submission"></div>
+        <div class="convivial-decision-flow__summary">
+            <div class="convivial-decision-flow__summary_infos"></div>
+            <div class="convivial-decision-flow__history"></div>
+            <div class="convivial-decision-flow__submission"></div>
         </div>
-        <div class="decision-tree__footer">
+        <div class="convivial-decision-flow__footer">
             <button class="btn btn-secondary step__button step__button--back">Back</button>
             <button class="btn btn-secondary step__button step__button--restart">Restart</button>
         </div>
     </div>
 
     <script>
-        // Automatically initialize decision trees on DOMContentLoaded
+        // Automatically initialize convivial decision flows on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.decision-tree').forEach(function (tree) {
-                if (tree.id) {
-                    new DecisionTree(tree.id);
+            document.querySelectorAll('.convivial-decision-flow').forEach(function (flow) {
+                if (flow.id) {
+                    new DecisionTree(flow.id);
                 } else {
-                    console.warn('Decision tree does not have an ID.');
+                    console.warn('Convivial decision flow does not have an ID.');
                 }
             });
         });
