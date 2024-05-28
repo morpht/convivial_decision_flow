@@ -19,8 +19,8 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const dt = new ConvivialDecisionFlow('local', 'example-flow', document.getElementById('example-flow'));
-      dt.defineFunction('changeBgColorFunction', function() {
-        document.getElementById('step-1').style.backgroundColor = '#f0f8ff';
+      dt.defineFunction('changeBgColorFunction', function(context) {
+        context.querySelector('#step-1').style.backgroundColor = '#f0f8ff';
       });
     });
   </script>

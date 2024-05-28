@@ -442,6 +442,9 @@ class ConvivialDecisionFlow {
         submissionElement.style.display = 'none';
       }
 
+      // Initialize custom function calls
+      this._initializeFunctionCalls();
+
       // Save the storage.
       this._saveStorage();
     } catch (e) {
@@ -708,14 +711,19 @@ class ConvivialDecisionFlow {
   /**
    * Execute a custom function from the storage.
    */
-  executeFunction(name) {
+  executeFunction(name, context = document) {
     const fnString = this.storage.functions[name];
     if (!fnString) {
       throw new Error(`Function "${name}" not found in storage`);
     }
     const shadowRoot = this._createShadowRoot();
     const script = document.createElement('script');
-    script.textContent = `(${fnString})()`;
+    script.textContent = `
+      (() => {
+        const context = document.querySelector("#${this.config.id}");
+        (${fnString})(context);
+      })();
+    `;
     shadowRoot.appendChild(script);
   }
 
@@ -745,12 +753,11 @@ class ConvivialDecisionFlow {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-  // Initialize the convivial decision flow object for all convivial decision flows.
-  document.querySelectorAll('.convivial-decision-flow').forEach((el) => {
-    if (el.hasAttribute('id')) {
-      new ConvivialDecisionFlow('local', el.id, el); // Modify as needed to use 'session' or 'local'
+  document.querySelectorAll('.convivial-decision-flow').forEach((flow) => {
+    if (flow.id) {
+      new ConvivialDecisionFlow('local', flow.id, flow);
     } else {
-      console.warn('Convivial decision flow does not have ID.');
+      console.warn('Convivial decision flow does not have an ID.');
     }
   });
-}, false);
+});
