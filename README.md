@@ -4,22 +4,31 @@ A JavaScript library for creating interactive convivial decision flows.
 
 ## Overview
 
-The Convivial Decision Flow library allows you to create dynamic, interactive convivial decision flows on your web pages. Users can navigate through a series of steps based on their choices, with the ability to store progress and display summaries of their selections.
+The Convivial Decision Flow library allows you to create dynamic, interactive decision flows on your web pages. Users can navigate through a series of steps based on their choices, with the ability to store progress and display summaries of their selections.
 
 ## Features
 
 - **Interactive Steps**: Guide users through a series of steps with clickable answers.
 - **Form Handling**: Collect user input through forms and navigate based on their responses.
-- **Local Storage**: Save user progress in local storage to maintain state across sessions.
+- **Storage Options**: Save user progress in local or session storage to maintain state across sessions.
 - **Dynamic Filtering**: Show or hide content based on user input using custom filters.
 - **Summary Display**: Automatically generate and display a summary of user choices at the end.
-- **Back and Restart Navigation**: Allow users to navigate backward and restart the convivial decision flow.
+- **Back and Restart Navigation**: Allow users to navigate backward and restart the decision flow.
+- **Custom Function Execution**: Define and execute custom functions securely from storage.
 
 ## New Features
 
+### Storage Options
+
+The library now supports both local and session storage for saving user progress. You can choose the type of storage by specifying it when initializing the `ConvivialDecisionFlow` instance.
+
+### Custom Function Execution
+
+You can now define and store custom functions in the selected storage. These functions can be executed securely using the `data-df-content` attribute. This feature helps in extending the functionality of the decision flow dynamically.
+
 ### Form Handling
 
-The library now supports handling form submissions within the convivial decision flow. Forms can collect user input and navigate to the next step based on the form's action attribute.
+The library supports handling form submissions within the decision flow. Forms can collect user input and navigate to the next step based on the form's action attribute.
 
 ### Dynamic Filtering
 
@@ -34,13 +43,13 @@ You can use data attributes to dynamically show or hide content based on user in
 
 Automatically generate summaries of user choices and display them in a designated section. The summary includes:
 
-- **Summary of Choices**: A list of all the user's choices throughout the convivial decision flow.
+- **Summary of Choices**: A list of all the user's choices throughout the decision flow.
 - **History**: Display the steps the user has taken.
 - **Submission Data**: Show collected form data.
 
 ### Example of Summary Divs
 
-At the end of the convivial decision flow, you can include divs to show a summary of user choices, the history of steps taken, and submission data. This can be configured in the HTML structure:
+At the end of the decision flow, you can include divs to show a summary of user choices, the history of steps taken, and submission data. This can be configured in the HTML structure:
 
 ```html
 <div class="step" id="summary" data-show-summary="true">
@@ -53,7 +62,7 @@ At the end of the convivial decision flow, you can include divs to show a summar
 
 ### Complex Conditions
 
-You can define complex conditions in your convivial decision flow using `data-dt-filter` attributes. The following examples illustrate how to use AND (`+`) and OR (`,`):
+You can define complex conditions in your decision flow using `data-dt-filter` attributes. The following examples illustrate how to use AND (`+`) and OR (`,`):
 
 - **Logical AND**: All conditions must be true.
   ```html
@@ -89,7 +98,7 @@ To use the Convivial Decision Flow library, you need to include both the JavaScr
 
 ### HTML Structure
 
-Create your convivial decision flow using a series of nested `div` elements. Each `div` with the class `step` represents a step in the convivial decision flow. Use `data-dt-filter` attributes to conditionally display content.
+Create your decision flow using a series of nested `div` elements. Each `div` with the class `step` represents a step in the decision flow. Use `data-dt-filter` attributes to conditionally display content.
 
 ```html
 <div class="convivial-decision-flow" id="example-flow">
@@ -136,20 +145,41 @@ Create your convivial decision flow using a series of nested `div` elements. Eac
 
 ### JavaScript Initialization
 
-The library automatically initializes all convivial decision flows on the page when the DOM content is loaded:
+The library automatically initializes all decision flows on the page when the DOM content is loaded:
 
 ```html
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.convivial-decision-flow').forEach(function (flow) {
     if (flow.id) {
-      new DecisionTree(flow.id);
+      new ConvivialDecisionFlow('local', flow.id, flow); // Modify as needed to use 'session' or 'local'
     } else {
       console.warn('Convivial decision flow does not have an ID.');
     }
   });
 });
 </script>
+```
+
+### Define and Execute Custom Functions
+
+You can define and store custom functions in the storage and execute them securely. Here's how:
+
+1. Define a function in the JavaScript:
+
+```javascript
+const dt = new ConvivialDecisionFlow('local', 'example-flow', document.getElementById('example-flow'));
+dt.defineFunction('submission', function() {
+  alert('Submission function executed');
+});
+```
+
+2. Execute the function using the `data-df-content` attribute:
+
+```html
+<div data-df-content="submission">
+  <button>Execute Submission Function</button>
+</div>
 ```
 
 ## How to Compress the JS File
@@ -180,7 +210,7 @@ For more details, refer to the [npm documentation](https://docs.npmjs.com/updati
 
 ## Example Use Case
 
-Here's an example of how you can use the convivial decision flow in a web page:
+Here's an example of how you can use the decision flow in a web page:
 
 ```html
 <!DOCTYPE html>

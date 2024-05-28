@@ -1,23 +1,25 @@
-/**
- * Class representing a Convivial decision flow.
- */
-class DecisionTree {
+class ConvivialDecisionFlow {
   'use strict';
 
   /**
    * Class constructor.
    *
+   * @param storageType {string} representing the type of storage ('local' or 'session').
    * @param id {string} representing id of HTML element.
-   *
+   * @param domElement {HTMLElement} representing the DOM element.
    */
-  constructor(id) {
+  constructor(storageType, id, domElement) {
+    this.storageType = storageType === 'session' ? sessionStorage : localStorage;
+    this.id = id;
+    this.domElement = domElement;
+
     // Validate steps and answers.
     this._validation(id);
 
     const steps = this._loadSteps(id);
     if (Array.isArray(steps)) {
       this.config = { id, first_step: steps[0], steps };
-      if (!this._isLocalStorageAvailable()) {
+      if (!this._isStorageAvailable()) {
         return;
       }
 
@@ -25,15 +27,15 @@ class DecisionTree {
       this.storage = this._loadStorage(id);
       // Activate the convivial decision flow.
       this.activate();
-      this.initializeForms();  // Ensure forms are initialized after activation
+      this.initializeForms(); // Ensure forms are initialized after activation
       // Track answer.
       document.querySelectorAll('#' + id + ' .step .step__answer')
-        .forEach(function (answer) {
+        .forEach((answer) => {
           if (answer.hasAttribute('href')) {
             answer.addEventListener('click', () => {
               this.filter();
               this.trackAnswer(answer.attributes.href.value.replace('#', ''), answer.hasAttribute('data-answer-path') ? answer.attributes['data-answer-path'].value : false);
-            })
+            });
           }
         }, this);
     } else {
@@ -42,19 +44,19 @@ class DecisionTree {
   }
 
   /**
-   * Check if the localstorage is available.
+   * Check if the storage is available.
    */
-  _isLocalStorageAvailable() {
+  _isStorageAvailable() {
     try {
-      if (typeof localStorage === 'undefined') {
+      if (typeof this.storageType === 'undefined') {
         return false;
       }
-      var test = 'test';
-      localStorage.setItem(test, test);
-      localStorage.removeItem(test);
+      const test = 'test';
+      this.storageType.setItem(test, test);
+      this.storageType.removeItem(test);
       return true;
     } catch (e) {
-      console.log('Convivial decision flow will not work optimally because the browser local storage is not enabled or accessible.');
+      console.log('Convivial decision flow will not work optimally because the browser storage is not enabled or accessible.');
       return false;
     }
   }
@@ -67,7 +69,7 @@ class DecisionTree {
     document
       .querySelector('#' + id)
       .querySelectorAll('.step')
-      .forEach(function (el, index) {
+      .forEach(function (el) {
         steps.push(el.id);
       });
     if (steps.length < 1) {
@@ -86,9 +88,7 @@ class DecisionTree {
     const steps = this.config.steps ? this.config.steps : this._loadSteps(this.config.id);
 
     if (history.length > 0 && steps.length > 0) {
-      const valid = history.every(function (val) {
-        return steps.indexOf(val) !== -1;
-      });
+      const valid = history.every((val) => steps.indexOf(val) !== -1);
       if (valid === false) {
         storage.history = [this.config.first_step];
         storage.active = this.config.first_step;
@@ -101,15 +101,18 @@ class DecisionTree {
   }
 
   /**
-   * Load the active convivial decision flow from local storage.
+   * Load the active convivial decision flow from storage.
    */
   _loadStorage(id) {
     let namespace = `convivial-decision-flow.${id}`;
-    let storage = JSON.parse(localStorage.getItem(namespace)) || {};
+    let storage = JSON.parse(this.storageType.getItem(namespace)) || {};
     if (Object.keys(storage).length !== 0) {
       storage = this._validateHistory(storage);
       if (!storage.vars) {
         storage.vars = {};
+      }
+      if (!storage.functions) {
+        storage.functions = {};
       }
       this.storage = storage;  // Initialize the local storage object
       return storage;
@@ -118,20 +121,18 @@ class DecisionTree {
       first_step: this.config.first_step,
       active: this.config.first_step,
       history: [this.config.first_step],
-      vars: {}
+      vars: {},
+      functions: {}
     };
     return this.storage;
   }
 
   /**
-   * Save the active convivial decision flow to local storage.
+   * Save the active convivial decision flow to storage.
    */
   _saveStorage() {
     let namespace = `convivial-decision-flow.${this.config.id}`;
-    let storage = JSON.parse(localStorage.getItem(namespace)) || {};
-    storage = this.storage;
-    localStorage.setItem(namespace, JSON.stringify(storage));
-    this.storage = storage;  // Refresh the local storage object
+    this.storageType.setItem(namespace, JSON.stringify(this.storage));
   }
 
   /**
@@ -139,14 +140,14 @@ class DecisionTree {
    */
   _validation(id) {
     const steps = document.querySelector('#' + id).querySelectorAll('.step');
-    steps.forEach(function (el, index) {
+    steps.forEach((el) => {
       if (!el.hasAttribute('id')) {
         console.warn('One of your steps in convivial decision flow with ID ' + id + ' does not have ID element filled.');
       }
     });
 
     // Every answer must have href and should have a data-answer-path.
-    document.querySelector('#' + id).querySelectorAll('.step__answer').forEach(function (el, index) {
+    document.querySelector('#' + id).querySelectorAll('.step__answer').forEach((el) => {
       if (!el.hasAttribute('href')) {
         console.warn('One of your answers in convivial decision flow id ' + id + ' does not have href filled.');
       }
@@ -229,7 +230,7 @@ class DecisionTree {
   _cleanHTML() {
     // Clean HTML of all answers and remove styles.
     document.querySelectorAll('#' + this.config.id + ' .convivial-decision-flow__summary_infos *')
-      .forEach(function (element) {
+      .forEach((element) => {
         element.remove();
       });
 
@@ -260,16 +261,17 @@ class DecisionTree {
     });
 
     let namespace = `convivial-decision-flow.${this.config.id}`;
-    let storage = JSON.parse(localStorage.getItem(namespace)) || {
+    let storage = JSON.parse(this.storageType.getItem(namespace)) || {
       first_step: this.config.first_step,
       active: this.config.first_step,
       history: [this.config.first_step],
-      vars: {}
+      vars: {},
+      functions: {}
     };
 
     // Update the vars array in the storage object
     storage.vars = { ...storage.vars, ...vars };
-    localStorage.setItem(namespace, JSON.stringify(storage));
+    this.storageType.setItem(namespace, JSON.stringify(storage));
 
     this.storage = storage;  // Refresh the local storage object
 
@@ -691,13 +693,62 @@ class DecisionTree {
     }
     document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + ';' + expires + ';' + ' path=/; SameSite=None; Secure';
   }
+
+  /**
+   * Define and store a custom function in the storage.
+   */
+  defineFunction(name, fn) {
+    if (typeof fn !== 'function') {
+      throw new Error('Provided argument is not a function');
+    }
+    this.storage.functions[name] = fn.toString();
+    this._saveStorage();
+  }
+
+  /**
+   * Execute a custom function from the storage.
+   */
+  executeFunction(name) {
+    const fnString = this.storage.functions[name];
+    if (!fnString) {
+      throw new Error(`Function "${name}" not found in storage`);
+    }
+    const shadowRoot = this._createShadowRoot();
+    const script = document.createElement('script');
+    script.textContent = `(${fnString})()`;
+    shadowRoot.appendChild(script);
+  }
+
+  /**
+   * Create a secure shadow root to execute functions.
+   */
+  _createShadowRoot() {
+    const shadowHost = document.createElement('div');
+    document.body.appendChild(shadowHost);
+    const shadowRoot = shadowHost.attachShadow({ mode: 'closed' });
+    return shadowRoot;
+  }
+
+  /**
+   * Initialize custom function calls based on data-df-content attribute.
+   */
+  _initializeFunctionCalls() {
+    document.querySelectorAll(`#${this.config.id} [data-df-content]`).forEach((element) => {
+      const functionName = element.getAttribute('data-df-content');
+      if (functionName) {
+        element.addEventListener('click', () => {
+          this.executeFunction(functionName);
+        });
+      }
+    });
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function () {
   // Initialize the convivial decision flow object for all convivial decision flows.
-  document.querySelectorAll('.convivial-decision-flow').forEach(function (el) {
+  document.querySelectorAll('.convivial-decision-flow').forEach((el) => {
     if (el.hasAttribute('id')) {
-      new DecisionTree(el.id);
+      new ConvivialDecisionFlow('local', el.id, el); // Modify as needed to use 'session' or 'local'
     } else {
       console.warn('Convivial decision flow does not have ID.');
     }
