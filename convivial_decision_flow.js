@@ -2,18 +2,20 @@ class ConvivialDecisionFlow {
   'use strict';
 
   /**
-   * Class constructor.
-   *
-   * @param storage {Storage} representing the storage object (localStorage or sessionStorage).
-   * @param id {string} representing id of HTML element.
-   * @param domElement {HTMLElement} representing the DOM element.
-   */
+   * Convivial Decision Flow constructor.
+   * 
+    * @param {Storage} storage - The storage object to use for storing data.
+    * @param {string} id - The ID of the convivial decision flow.
+    * @param {HTMLElement} domElement - The DOM element of the convivial decision flow.
+    * @throws {Error} - If the HTML structure is incorrect.
+    */
   constructor(storage, id, domElement) {
     this.storage = storage;
     this.id = id;
     this.domElement = domElement;
 
-    // Validate steps and answers.
+    this.customFunctions = {}; // Dictionary to store custom functions
+
     this._validation(id);
 
     const steps = this._loadSteps(id);
@@ -23,12 +25,10 @@ class ConvivialDecisionFlow {
         return;
       }
 
-      // Load all the steps available in DOM.
       this.storageData = this._loadStorage(id);
-      // Activate the convivial decision flow.
       this.activate();
-      this.initializeForms(); // Ensure forms are initialized after activation
-      // Track answer.
+      this.initializeForms();
+      this._defineDefaultFunctions();
       document.querySelectorAll('#' + id + ' .step .step__answer')
         .forEach((answer) => {
           if (answer.hasAttribute('href')) {
@@ -40,6 +40,91 @@ class ConvivialDecisionFlow {
         }, this);
     } else {
       throw new Error('Please follow proper HTML structure.');
+    }
+  }
+
+  /**
+   * Define a custom function.
+   * 
+   * @param {string} name - The name of the function.
+   * @param {Function} fn - The function to define.
+   * @throws {Error} - If the provided argument is not a function.
+   * @returns {void}
+   */
+  defineFunction(name, fn) {
+    if (typeof fn !== 'function') {
+      throw new Error('Provided argument is not a function');
+    }
+    this.customFunctions[name] = fn;
+    this.storageData.functions[name] = fn.toString();
+    this._saveStorage();
+  }
+
+  /**
+   * Execute a function.
+   * 
+   * @param {string} name - The name of the function.
+   * @param {Array} args - The arguments to pass to the function.
+   * @throws {Error} - If the function is not found in storage.
+   */
+  executeFunction(name, args = []) {
+    if (this.customFunctions[name]) {
+      return this.customFunctions[name].apply(this, args);
+    }
+    const fnString = this.storageData.functions[name];
+    if (!fnString) {
+      throw new Error(`Function "${name}" not found in storage`);
+    }
+
+    const context = this;
+    try {
+      const fn = new Function('context', 'args', `"use strict"; return (${fnString}).apply(context, args);`);
+      return fn(context, args);
+    } catch (e) {
+      console.error(`Error executing function "${name}":`, e);
+      console.error(`Function string: "${fnString}"`);
+      throw e;
+    }
+  }
+
+  /**
+   * Define default functions.
+   */
+  _defineDefaultFunctions() {
+    this._showHistory = this._showHistory.bind(this);
+    this._showSummary = this._showSummary.bind(this);
+    this._showSubmission = this._showSubmission.bind(this);
+    this._compare = this._compare.bind(this);
+    this._evaluateCriteria = this._evaluateCriteria.bind(this);
+    this._filterElement = this._filterElement.bind(this);
+    this._handleFormSubmit = this._handleFormSubmit.bind(this);
+  }
+
+  /**
+   * Show the history of the active convivial decision flow.
+   */
+  _showHistory() {
+    const historyElement = document.querySelector(`#${this.config.id} .convivial-decision-flow__history`);
+    if (historyElement) {
+      const dlElement = document.createElement('dl');
+
+      this.storageData.history.forEach(stepId => {
+        if (stepId != this.config.first_step) {
+          const stepElement = document.querySelector(`#${this.config.id} #${stepId}`);
+          const questionElement = stepElement.querySelector('.step__question');
+          const dtElement = document.createElement('dt');
+          dtElement.textContent = questionElement ? questionElement.textContent.trim() : '';
+          dlElement.appendChild(dtElement);
+
+          const titleElement = stepElement.querySelector('.step__heading');
+          const ddElement = document.createElement('dd');
+          ddElement.textContent = titleElement ? titleElement.textContent.trim() : '';
+          dlElement.appendChild(ddElement);
+        }
+      });
+
+      historyElement.innerHTML = '<h3>History</h3>';
+      historyElement.appendChild(dlElement);
     }
   }
 
@@ -59,6 +144,22 @@ class ConvivialDecisionFlow {
       console.log('Convivial decision flow will not work optimally because the browser storage is not enabled or accessible.');
       return false;
     }
+  }
+
+  /** 
+ * Get the value of a variable from the storage.
+ */
+  vars(key, operation, value) {
+    const variableValue = this.storageData.vars[key];
+    return this._compare(variableValue, operation, value);
+  }
+
+  /**
+   * Check if the step has been visited.
+   */
+  visited(stepId, operation, value) {
+    const isVisited = this.storageData.history.includes(stepId);
+    return this._compare(isVisited, operation, value);
   }
 
   /**
@@ -291,18 +392,32 @@ class ConvivialDecisionFlow {
   }
 
   _evaluateCriteria(criteria) {
-    if (this.storageData.functions['_evaluateCriteria']) {
-      return this.executeFunction('_evaluateCriteria', [criteria]);
+    const parts = criteria.split('_');
+    const functionName = parts[0];
+    const args = parts.slice(1);
+
+    if (this.storageData.functions[functionName]) {
+      return this.executeFunction(functionName, args);
     }
-    if (criteria.startsWith('var_')) {
-      const [variable, operation, value] = criteria.slice(4).split('_');
-      return this._compare(this.storageData.vars[variable], operation, value);
-    } else if (criteria.startsWith('visited_')) {
-      return this.storageData.history.includes(criteria.slice(8));
+
+    // Fallback for default functions
+    if (functionName === 'var') {
+      return this.vars(...args);
+    } else if (functionName === 'visited') {
+      return this.visited(...args);
     }
+
     return false;
   }
 
+  /**
+   * Compare two values based on the operator.
+   * 
+   * @param {*} variableValue 
+   * @param {*} operator 
+   * @param {*} comparator 
+   * @returns 
+   */
   _compare(variableValue, operator, comparator) {
     if (this.storageData.functions['_compare']) {
       return this.executeFunction('_compare', [variableValue, operator, comparator]);
@@ -319,38 +434,6 @@ class ConvivialDecisionFlow {
       case 'eq': return variableValue == comparator; // use == for type coercion
       case 'empty': return variableValue === '';
       default: return false;
-    }
-  }
-
-  /** Show the history data. */
-  _showHistory() {
-    if (this.storageData.functions['_showHistory']) {
-      return this.executeFunction('_showHistory', []);
-    }
-    const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
-    if (historyElement) {
-      // Create the <dl> element
-      const dlElement = document.createElement('dl');
-
-      // Map through the history and create <dd> elements for each title
-      this.storageData.history.forEach(stepId => {
-        if (stepId != this.config.first_step) {
-          const stepElement = document.querySelector('#' + this.config.id + ' #' + stepId);
-          const questionElement = stepElement.querySelector('.step__question');
-          const dtElement = document.createElement('dt');
-          dtElement.textContent = questionElement ? questionElement.textContent.trim() : '';
-          dlElement.appendChild(dtElement);
-
-          const titleElement = stepElement.querySelector('.step__heading');
-          const ddElement = document.createElement('dd');
-          ddElement.textContent = titleElement ? titleElement.textContent.trim() : '';
-          dlElement.appendChild(ddElement);
-        }
-      });
-
-      // Set the innerHTML of the history element to the <dl> element
-      historyElement.innerHTML = '<h3>History</h3>';
-      historyElement.appendChild(dlElement);
     }
   }
 
@@ -462,6 +545,9 @@ class ConvivialDecisionFlow {
     }
   }
 
+  /**
+   * Initialize forms.
+   */
   initializeForms() {
     document.querySelectorAll('#' + this.config.id + ' .dt-form').forEach((form) => {
       form.addEventListener('submit', (event) => {
@@ -704,31 +790,6 @@ class ConvivialDecisionFlow {
       expires = '';
     }
     document.cookie = encodeURIComponent(name) + '=' + encodeURIComponent(value) + ';' + expires + ';' + ' path=/; SameSite=None; Secure';
-  }
-
-  /**
-   * Define and store a custom function in the storage.
-   */
-  defineFunction(name, fn) {
-    if (typeof fn !== 'function') {
-      throw new Error('Provided argument is not a function');
-    }
-    this[name] = fn;
-    this.storageData.functions[name] = fn.toString();
-    this._saveStorage();
-  }
-
-  /**
-   * Execute a custom function from the storage.
-   */
-  executeFunction(name, args = []) {
-    const fnString = this.storageData.functions[name];
-    if (!fnString) {
-      throw new Error(`Function "${name}" not found in storage`);
-    }
-    const context = document.querySelector(`#${this.config.id}`);
-    const fn = new Function('context', 'args', `return (${fnString})(context, ...args);`);
-    return fn(context, args);
   }
 
   /**
