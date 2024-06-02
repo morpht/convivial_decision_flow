@@ -18,7 +18,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const dt = new ConvivialDecisionFlow('local', 'example-flow', document.getElementById('example-flow'));
+      const dt = new ConvivialDecisionFlow(localStorage, 'example-flow', document.getElementById('example-flow'));
       dt.defineFunction('fetchDataFunction', function() {
         fetch('https://api.example.com/data')
           .then(response => response.json())

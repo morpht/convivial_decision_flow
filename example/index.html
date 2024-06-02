@@ -222,7 +222,7 @@
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.convivial-decision-flow').forEach(function (flow) {
                 if (flow.id) {
-                    new ConvivialDecisionFlow('local', flow.id, flow); // Modify as needed to use 'session' or 'local'
+                    new ConvivialDecisionFlow(localStorage, flow.id, flow); // Modify as needed to use 'session' or 'local'
                 } else {
                     console.warn('Convivial decision flow does not have an ID.');
                 }

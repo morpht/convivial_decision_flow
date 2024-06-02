@@ -460,12 +460,19 @@ class ConvivialDecisionFlow {
           ddElement.textContent = this._capitalizeFirstLetter(value);
 
           dlElement.appendChild(dtElement);
-          ddElement.appendChild(ddElement);
+          dlElement.appendChild(ddElement);
         }
       });
 
-      submissionElement.innerHTML = '<h3>Submission</h3>';
-      submissionElement.appendChild(dlElement);
+      // Clear the innerHTML of the submissionElement
+      submissionElement.innerHTML = '';
+      // Create a new container for the submission content
+      const submissionContainer = document.createElement('div');
+      submissionContainer.innerHTML = '<h3>Submission</h3>';
+      submissionContainer.appendChild(dlElement);
+
+      // Append the new container to the submissionElement
+      submissionElement.appendChild(submissionContainer);
     }
   }
 

@@ -18,7 +18,7 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const dt = new ConvivialDecisionFlow('local', 'example-flow', document.getElementById('example-flow'));
+      const dt = new ConvivialDecisionFlow(localStorage, 'example-flow', document.getElementById('example-flow'));
       dt.defineFunction('alertFunction', function() {
         alert('This is a custom alert function');
       });

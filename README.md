@@ -152,7 +152,7 @@ The library automatically initializes all decision flows on the page when the DO
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.convivial-decision-flow').forEach(function (flow) {
     if (flow.id) {
-      new ConvivialDecisionFlow('local', flow.id, flow); // Modify as needed to use 'session' or 'local'
+      new ConvivialDecisionFlow(localStorage, flow.id, flow); // Modify as needed to use 'session' or 'local'
     } else {
       console.warn('Convivial decision flow does not have an ID.');
     }
@@ -168,7 +168,7 @@ You can define and store custom functions in the storage and execute them secure
 1. Define a function in the JavaScript:
 
 ```javascript
-const dt = new ConvivialDecisionFlow('local', 'example-flow', document.getElementById('example-flow'));
+const dt = new ConvivialDecisionFlow(localStorage, 'example-flow', document.getElementById('example-flow'));
 dt.defineFunction('submission', function() {
   alert('Submission function executed');
 });
