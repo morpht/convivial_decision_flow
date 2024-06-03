@@ -92,234 +92,205 @@ class ConvivialDecisionFlow {
    * Define default functions.
    */
   _defineDefaultFunctions() {
-    // Show the history of the active convivial decision flow.
-    this.defineFunction('_showHistory', function () {
-      const historyElement = document.querySelector(`#${this.config.id} .convivial-decision-flow__history`);
-      if (historyElement) {
-        const dlElement = document.createElement('dl');
+    if (this.definingDefaultFunctions) return;
+    this.definingDefaultFunctions = true;
 
-        this.storageData.history.forEach(stepId => {
-          if (stepId != this.config.first_step) {
-            const stepElement = document.querySelector(`#${this.config.id} #${stepId}`);
-            const questionElement = stepElement.querySelector('.step__question');
-            const dtElement = document.createElement('dt');
-            dtElement.textContent = questionElement ? questionElement.textContent.trim() : '';
-            dlElement.appendChild(dtElement);
+    // Check if the functions are already defined in storage
+    const defaultFunctions = {
+      '_showHistory': function () {
+        const historyElement = document.querySelector(`#${this.config.id} .convivial-decision-flow__history`);
+        if (historyElement) {
+          const dlElement = document.createElement('dl');
 
-            const titleElement = stepElement.querySelector('.step__heading');
-            const ddElement = document.createElement('dd');
-            ddElement.textContent = titleElement ? titleElement.textContent.trim() : '';
-            dlElement.appendChild(ddElement);
-          }
-        });
+          this.storageData.history.forEach(stepId => {
+            if (stepId != this.config.first_step) {
+              const stepElement = document.querySelector(`#${this.config.id} #${stepId}`);
+              const questionElement = stepElement.querySelector('.step__question');
+              const dtElement = document.createElement('dt');
+              dtElement.textContent = questionElement ? questionElement.textContent.trim() : '';
+              dlElement.appendChild(dtElement);
 
-        historyElement.innerHTML = '<h3>History</h3>';
-        historyElement.appendChild(dlElement);
-      }
-    });
-
-    // Show the summary of the active convivial decision flow.
-    this.defineFunction('_showSummary', function () {
-      // Clean HTML first.
-      this._cleanHTML();
-
-      const display_summary_in_step = document.querySelector('#' + this.config.id + ' #' + this.storageData.active).hasAttribute('data-show-summary');
-      let furtherQuestions = document.querySelector('#' + this.config.id + ' #' + this.storageData.active + ' .step__answer');
-
-      if (furtherQuestions != null) {
-        furtherQuestions = furtherQuestions.innerHTML.replace(/<\!--.*?-->/g, '').trim().length;
-      }
-
-      if (furtherQuestions === 0 || furtherQuestions == null || display_summary_in_step) {
-        // We are displaying summary in this step.
-        this.show('#' + this.config.id + ' .convivial-decision-flow__summary');
-
-        // Show step info.
-        let infoHTML = '';
-        if (this.storageData.history) {
-          // Copy history values to a local variable.
-          const history = this.storageData.history.slice();
-
-          history.forEach((el) => {
-            if (document.querySelector('#' + this.config.id + ' #' + el + ' .step__info')) {
-              infoHTML += document.querySelector('#' + this.config.id + ' #' + el + ' .step__info').innerHTML;
+              const titleElement = stepElement.querySelector('.step__heading');
+              const ddElement = document.createElement('dd');
+              ddElement.textContent = titleElement ? titleElement.textContent.trim() : '';
+              dlElement.appendChild(ddElement);
             }
           });
 
-          // Append info html into the step info extra.
-          const summary_element = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__summary');
-          if (summary_element && summary_element.nodeType) {
-            // In case of having infos element defined.
-            if (summary_element.querySelector('.convivial-decision-flow__summary_infos') !== null) {
-              summary_element.querySelector('.convivial-decision-flow__summary_infos').innerHTML = infoHTML;
+          historyElement.innerHTML = '<h3>History</h3>';
+          historyElement.appendChild(dlElement);
+        }
+      },
+      '_showSummary': function () {
+        this._cleanHTML();
+
+        const display_summary_in_step = document.querySelector('#' + this.config.id + ' #' + this.storageData.active).hasAttribute('data-show-summary');
+        let furtherQuestions = document.querySelector('#' + this.config.id + ' #' + this.storageData.active + ' .step__answer');
+
+        if (furtherQuestions != null) {
+          furtherQuestions = furtherQuestions.innerHTML.replace(/<\!--.*?-->/g, '').trim().length;
+        }
+
+        if (furtherQuestions === 0 || furtherQuestions == null || display_summary_in_step) {
+          this.show('#' + this.config.id + ' .convivial-decision-flow__summary');
+
+          let infoHTML = '';
+          if (this.storageData.history) {
+            const history = this.storageData.history.slice();
+
+            history.forEach((el) => {
+              if (document.querySelector('#' + this.config.id + ' #' + el + ' .step__info')) {
+                infoHTML += document.querySelector('#' + this.config.id + ' #' + el + ' .step__info').innerHTML;
+              }
+            });
+
+            const summary_element = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__summary');
+            if (summary_element && summary_element.nodeType) {
+              if (summary_element.querySelector('.convivial-decision-flow__summary_infos') !== null) {
+                summary_element.querySelector('.convivial-decision-flow__summary_infos').innerHTML = infoHTML;
+              } else {
+                const divElement = document.createElement('div');
+                divElement.classList.add('convivial-decision-flow__summary_infos');
+                divElement.innerHTML = infoHTML;
+                summary_element.appendChild(divElement);
+                this.filter();
+              }
             } else {
-              const divElement = document.createElement('div');
-              // Add the class 'convivial-decision-flow__summary_infos' to the div element.
-              divElement.classList.add('convivial-decision-flow__summary_infos');
-              // Set the innerHTML of the div element to the HTML string.
-              divElement.innerHTML = infoHTML;
-              // Insert the div element before the target element.
-              summary_element.appendChild(divElement);
-              // Filter results by start and stop parameters.
-              this.filter();
+              console.warn('Your convivial decision flow with ID ' + this.config.id + ' does not have element with class convivial-decision-flow__summary.');
             }
           } else {
-            console.warn('Your convivial decision flow with ID ' + this.config.id + ' does not have element with class convivial-decision-flow__summary.');
+            this.hide('#' + this.config.id + ' .convivial-decision-flow__summary');
           }
-        } else {
-          this.hide('#' + this.config.id + ' .convivial-decision-flow__summary');
-        }
-        this._showHistory();
-        this._showSubmission();
-        // Show the history and submission sections
-        const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
+          this._showHistory();
+          this._showSubmission();
 
-        if (historyElement) {
-          historyElement.style.display = 'block';
-        }
+          const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
+          if (historyElement) {
+            historyElement.style.display = 'block';
+          }
 
+          const submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
+          if (submissionElement) {
+            submissionElement.style.display = 'block';
+          }
+        }
+      },
+      '_showSubmission': function () {
         const submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
-
         if (submissionElement) {
-          submissionElement.style.display = 'block';
+          const submissions = this.storageData.vars;
+          const dlElement = document.createElement('dl');
+
+          Object.keys(submissions).forEach(key => {
+            if (!key.endsWith('_label')) {
+              const label = submissions[key + '_label'] || key;
+              const value = submissions[key];
+
+              const dtElement = document.createElement('dt');
+              dtElement.textContent = label;
+
+              const ddElement = document.createElement('dd');
+              ddElement.textContent = this._capitalizeFirstLetter(value);
+
+              dlElement.appendChild(dtElement);
+              dlElement.appendChild(ddElement);
+            }
+          });
+
+          submissionElement.innerHTML = '';
+          const submissionContainer = document.createElement('div');
+          submissionContainer.innerHTML = '<h3>Submission</h3>';
+          submissionContainer.appendChild(dlElement);
+          submissionElement.appendChild(submissionContainer);
         }
-      }
-    });
+      },
+      '_compare': function (variableValue, operator, comparator) {
+        if (!isNaN(variableValue)) variableValue = parseFloat(variableValue);
+        if (!isNaN(comparator)) comparator = parseFloat(comparator);
 
-    // Show the submission of the active convivial decision flow.
-    this.defineFunction('_showSubmission', function () {
-      if (this.storageData.functions['_showSubmission']) {
-        return this.executeFunction('_showSubmission', []);
-      }
-      const submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
-      if (submissionElement) {
-        const submissions = this.storageData.vars;
-
-        const dlElement = document.createElement('dl');
-
-        Object.keys(submissions).forEach(key => {
-          if (!key.endsWith('_label')) {
-            const label = submissions[key + '_label'] || key;
-            const value = submissions[key];
-
-            const dtElement = document.createElement('dt');
-            dtElement.textContent = label;
-
-            const ddElement = document.createElement('dd');
-            ddElement.textContent = this._capitalizeFirstLetter(value);
-
-            dlElement.appendChild(dtElement);
-            dlElement.appendChild(ddElement);
-          }
-        });
-
-        // Clear the innerHTML of the submissionElement
-        submissionElement.innerHTML = '';
-        // Create a new container for the submission content
-        const submissionContainer = document.createElement('div');
-        submissionContainer.innerHTML = '<h3>Submission</h3>';
-        submissionContainer.appendChild(dlElement);
-
-        // Append the new container to the submissionElement
-        submissionElement.appendChild(submissionContainer);
-      }
-    });
-
-    // Compare two values.
-    this.defineFunction('_compare', function (variableValue, operator, comparator) {
-      if (this.storageData.functions['_compare']) {
-        return this.executeFunction('_compare', [variableValue, operator, comparator]);
-      }
-      // Ensure both variableValue and comparator are of the same type before comparison
-      if (!isNaN(variableValue)) variableValue = parseFloat(variableValue);
-      if (!isNaN(comparator)) comparator = parseFloat(comparator);
-
-      switch (operator) {
-        case 'gt': return variableValue > comparator;
-        case 'gte': return variableValue >= comparator;
-        case 'lt': return variableValue < comparator;
-        case 'lte': return variableValue <= comparator;
-        case 'eq': return variableValue == comparator; // use == for type coercion
-        case 'empty': return variableValue === '';
-        default: return false;
-      }
-    });
-
-    // Evaluate criteria.
-    this.defineFunction('_evaluateCriteria', function (criteria) {
-      const parts = criteria.split('_');
-      const functionName = parts[0];
-      const args = parts.slice(1);
-
-      if (this.storageData.functions[functionName]) {
-        return this.executeFunction(functionName, args);
-      }
-
-      // Fallback for default functions
-      if (functionName === 'var') {
-        return this.vars(...args);
-      } else if (functionName === 'visited') {
-        return this.visited(...args);
-      }
-
-      return false;
-    });
-
-    // Filter element.
-    this.defineFunction('_filterElement', function (element) {
-      const filters = element.getAttribute('data-dt-filter');
-      if (!filters) return true;
-      return filters.split(',').some(filter => {
-        return filter.split('+').every(criteria => {
-          if (criteria.startsWith('!')) {
-            return !this._evaluateCriteria(criteria.slice(1));
-          }
-          return this._evaluateCriteria(criteria);
-        });
-      });
-    });
-
-    // Handle form submission.
-    this.defineFunction('_handleFormSubmit', function (form) {
-      const formData = new FormData(form);
-      const vars = {};
-
-      formData.forEach((value, key) => {
-        vars[key] = value;
-
-        // Find the corresponding label using the name attribute
-        let label;
-        form.querySelectorAll('label').forEach(lbl => {
-          if (lbl.getAttribute('for') === key) {
-            label = lbl.textContent.trim();
-          }
-        });
-
-        // Store the label text in vars if a label is found
-        if (label) {
-          vars[key + '_label'] = label;
+        switch (operator) {
+          case 'gt': return variableValue > comparator;
+          case 'gte': return variableValue >= comparator;
+          case 'lt': return variableValue < comparator;
+          case 'lte': return variableValue <= comparator;
+          case 'eq': return variableValue == comparator; // use == for type coercion
+          case 'empty': return variableValue === '';
+          default: return false;
         }
-      });
+      },
+      '_evaluateCriteria': function (criteria) {
+        const parts = criteria.split('_');
+        const functionName = parts[0];
+        const args = parts.slice(1);
 
-      const namespace = `convivial-decision-flow.${this.config.id}`;
-      const storageData = JSON.parse(this.storage.getItem(namespace)) || {
-        first_step: this.config.first_step,
-        active: this.config.first_step,
-        history: [this.config.first_step],
-        vars: {},
-        functions: {}
-      };
+        if (this.storageData.functions[functionName]) {
+          return this.executeFunction(functionName, args);
+        }
 
-      // Update the vars array in the storage object
-      storageData.vars = { ...storageData.vars, ...vars };
-      this.storage.setItem(namespace, JSON.stringify(storageData));
+        if (functionName === 'var') {
+          return this.vars(...args);
+        } else if (functionName === 'visited') {
+          return this.visited(...args);
+        }
 
-      this.storageData = storageData;  // Refresh the storage object
+        return false;
+      },
+      '_filterElement': function (element) {
+        const filters = element.getAttribute('data-dt-filter');
+        if (!filters) return true;
+        return filters.split(',').some(filter => {
+          return filter.split('+').every(criteria => {
+            if (criteria.startsWith('!')) {
+              return !this._evaluateCriteria(criteria.slice(1));
+            }
+            return this._evaluateCriteria(criteria);
+          });
+        });
+      },
+      '_handleFormSubmit': function (form) {
+        const formData = new FormData(form);
+        const vars = {};
 
-      const nextStep = form.getAttribute('action').replace('#', '');
-      this.trackAnswer(nextStep);
-      this.filter();
+        formData.forEach((value, key) => {
+          vars[key] = value;
+          let label;
+          form.querySelectorAll('label').forEach(lbl => {
+            if (lbl.getAttribute('for') === key) {
+              label = lbl.textContent.trim();
+            }
+          });
+          if (label) {
+            vars[key + '_label'] = label;
+          }
+        });
+
+        const namespace = `convivial-decision-flow.${this.config.id}`;
+        const storageData = JSON.parse(this.storage.getItem(namespace)) || {
+          first_step: this.config.first_step,
+          active: this.config.first_step,
+          history: [this.config.first_step],
+          vars: {},
+          functions: {}
+        };
+
+        storageData.vars = { ...storageData.vars, ...vars };
+        this.storage.setItem(namespace, JSON.stringify(storageData));
+
+        this.storageData = storageData;
+        const nextStep = form.getAttribute('action').replace('#', '');
+        this.trackAnswer(nextStep);
+        this.filter();
+      }
+    };
+
+    // Define the functions if they are not already defined
+    Object.keys(defaultFunctions).forEach(fnName => {
+      if (!this.storageData.functions[fnName]) {
+        this.defineFunction(fnName, defaultFunctions[fnName]);
+      }
     });
+
+    this.definingDefaultFunctions = false;
   }
 
   /**
