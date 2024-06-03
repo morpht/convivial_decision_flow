@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en-US">
+
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,6 +8,7 @@
   <link rel="stylesheet" type="text/css" href="../style.css">
   <script type="text/javascript" src="../convivial_decision_flow.js" defer></script>
 </head>
+
 <body>
   <h1>Custom Functions Example</h1>
   <div class="convivial-decision-flow" id="example-flow">
@@ -20,10 +22,34 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const dt = new ConvivialDecisionFlow(localStorage, 'example-flow', document.getElementById('example-flow'));
-      dt.defineFunction('updateTextFunction', function() {
+
+      // Define a custom function
+      dt.defineFunction('updateTextFunction', function () {
         document.getElementById('custom-text').textContent = 'Updated text';
       });
+
+      // Add a listener to the button to execute the function
+      document.querySelector('button[data-df-content="updateTextFunction"]').addEventListener('click', function () {
+        dt.executeFunction('updateTextFunction');
+      });
+
+      // Update the custom function after a delay
+      setTimeout(() => {
+        dt.defineFunction('updateTextFunction', function () {
+          document.getElementById('custom-text').textContent = 'Updated text 2';
+        });
+        console.log('Function updated to: Updated text 2');
+      }, 5000);
+
+      // Manually update the stored function in localStorage for testing
+      setTimeout(() => {
+        const storageData = JSON.parse(localStorage.getItem('convivial-decision-flow.example-flow'));
+        storageData.functions['updateTextFunction'] = "function() { document.getElementById('custom-text').textContent = 'Updated text 3'; }";
+        localStorage.setItem('convivial-decision-flow.example-flow', JSON.stringify(storageData));
+        console.log('Function manually updated to: Updated text 3');
+      }, 10000);
     });
   </script>
 </body>
+
 </html>

@@ -69,18 +69,18 @@ class ConvivialDecisionFlow {
    * @throws {Error} - If the function is not found in storage.
    */
   executeFunction(name, args = []) {
-    if (this.customFunctions[name]) {
-      return this.customFunctions[name].apply(this, args);
-    }
-    const fnString = this.storageData.functions[name];
+    // Reload the storage data from localStorage to get the latest function
+    const namespace = `convivial-decision-flow.${this.config.id}`;
+    const storageData = JSON.parse(this.storage.getItem(namespace));
+
+    const fnString = storageData.functions[name];
     if (!fnString) {
       throw new Error(`Function "${name}" not found in storage`);
     }
 
-    const context = this;
     try {
       const fn = new Function('context', 'args', `"use strict"; return (${fnString}).apply(context, args);`);
-      return fn(context, args);
+      return fn(this, args);
     } catch (e) {
       console.error(`Error executing function "${name}":`, e);
       console.error(`Function string: "${fnString}"`);
