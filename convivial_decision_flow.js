@@ -202,7 +202,7 @@ class ConvivialDecisionFlow {
       }
     };
 
-    this.functions.filter.compare = (context, el, variableValue, operator, comparator) => {
+    this.functions.filter.compare = (variableValue, operator, comparator) => {
       if (!isNaN(variableValue)) variableValue = parseFloat(variableValue);
       if (!isNaN(comparator)) comparator = parseFloat(comparator);
 
@@ -217,38 +217,48 @@ class ConvivialDecisionFlow {
       }
     };
 
-    this.functions.filter.evaluate = (context, el, criteria) => {
+    this.functions.vars = (key, operation, value) => {
+      const variableValue = this.storageData.vars[key];
+      return this.functions.filter.compare(variableValue, operation, value);
+    }
+
+    this.functions.visited = (stepId, operation, value) => {
+      const isVisited = this.storageData.history.includes(stepId);
+      return this.functions.filter.compare(isVisited, operation, value);
+    }
+
+    this.functions.filter.evaluate = (el, criteria) => {
       const parts = criteria.split('_');
       const functionName = parts[0];
       const args = parts.slice(1);
 
-      if (this.storageData.functions[functionName]) {
-        return this.executeFunction(functionName, args);
+      if (this.functions.filter[functionName]) {
+        return this.functions.filter[functionName](el, ...args);
       }
 
       if (functionName === 'var') {
-        return this.vars(...args);
+        return this.functions.vars(...args);
       } else if (functionName === 'visited') {
-        return this.visited(...args);
+        return this.functions.visited(...args);
       }
 
       return false;
     };
 
-    this.functions.filter.process = (context, el) => {
+    this.functions.filter.process = (el) => {
       const filters = el.getAttribute('data-dt-filter');
       if (!filters) return true;
       return filters.split(',').some(filter => {
         return filter.split('+').every(criteria => {
           if (criteria.startsWith('!')) {
-            return !this.functions.filter.evaluate(context, el, criteria.slice(1));
+            return !this.functions.filter.evaluate(el, criteria.slice(1));
           }
-          return this.functions.filter.evaluate(context, el, criteria);
+          return this.functions.filter.evaluate(el, criteria);
         });
       });
     };
 
-    this.functions.form = (context, el, form) => {
+    this.functions.form = (form) => {
       const formData = new FormData(form);
       const vars = {};
 
@@ -302,22 +312,6 @@ class ConvivialDecisionFlow {
       console.log('Convivial decision flow will not work optimally because the browser storage is not enabled or accessible.');
       return false;
     }
-  }
-
-  /** 
- * Get the value of a variable from the storage.
- */
-  vars(key, operation, value) {
-    const variableValue = this.storageData.vars[key];
-    return this._compare(variableValue, operation, value);
-  }
-
-  /**
-   * Check if the step has been visited.
-   */
-  visited(stepId, operation, value) {
-    const isVisited = this.storageData.history.includes(stepId);
-    return this._compare(isVisited, operation, value);
   }
 
   /**
@@ -511,7 +505,7 @@ class ConvivialDecisionFlow {
     document.querySelectorAll('#' + this.config.id + ' .dt-form').forEach((form) => {
       form.addEventListener('submit', (event) => {
         event.preventDefault();
-        this._handleFormSubmit(form);
+        this.functions.form(form);
       });
     });
   }
@@ -755,7 +749,6 @@ class ConvivialDecisionFlow {
    * Initialize custom function calls based on data-df-content attribute.
    */
   _initializeFunctionCalls() {
-    console.log('Initializing custom function calls');
     document.querySelectorAll(`#${this.config.id} [data-df-show]`).forEach((element) => {
       const functionName = element.getAttribute('data-df-show');
       if (functionName) {

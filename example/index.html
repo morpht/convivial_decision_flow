@@ -87,8 +87,8 @@
 
         <!-- Summary and Footer -->
         <div class="convivial-decision-flow__summary">
-            <div class="convivial-decision-flow__summary_infos"></div>
-            <div class="convivial-decision-flow__history"></div>
+            <div data-df-show="history"></div>
+            <div data-df-show="submission"></div>
         </div>
         <div class="convivial-decision-flow__footer">
             <button class="btn btn-secondary step__button step__button--back">Back</button>
@@ -132,8 +132,7 @@
                     <li data-dt-filter="var_nationality_eq_czech"><a class="step__answer" href="#bar-spirits"
                             data-answer-path="spirits">Spirits</a></li>
                     <li data-dt-filter="var_nationality_eq_japanese"><a class="step__answer" href="#bar-sake"
-                            data-answer-path="sake">Sake</a>
-                    </li>
+                            data-answer-path="sake">Sake</a></li>
                 </ul>
             </div>
             <div data-dt-filter="!var_nationality_eq_japanese+var_age_lt_18,var_nationality_eq_japanese+var_age_lt_20">
@@ -160,7 +159,7 @@
             </div>
         </div>
         <div class="step" id="bar-vodka" data-cookie="outcome=bar-vodka">
-            <h3 class=" step__heading">Vodka</h3>
+            <h3 class="step__heading">Vodka</h3>
             <div>
                 <ul>
                     <li>Smirnoff</li>
@@ -207,9 +206,8 @@
 
         <!-- Summary and Footer -->
         <div class="convivial-decision-flow__summary">
-            <div class="convivial-decision-flow__summary_infos"></div>
-            <div class="convivial-decision-flow__history"></div>
-            <div class="convivial-decision-flow__submission"></div>
+            <div data-df-show="history"></div>
+            <div data-df-show="submission"></div>
         </div>
         <div class="convivial-decision-flow__footer">
             <button class="btn btn-secondary step__button step__button--back">Back</button>
@@ -218,11 +216,12 @@
     </div>
 
     <script>
-        // Automatically initialize convivial decision flows on DOMContentLoaded
+        // Define custom functions
         document.addEventListener('DOMContentLoaded', function () {
             document.querySelectorAll('.convivial-decision-flow').forEach(function (flow) {
+                console.log(flow);
                 if (flow.id) {
-                    new ConvivialDecisionFlow(localStorage, flow.id, flow); // Modify as needed to use 'session' or 'local'
+                    const dt = new ConvivialDecisionFlow(localStorage, flow.id, flow); // Modify as needed to use 'session' or 'local'
                 } else {
                     console.warn('Convivial decision flow does not have an ID.');
                 }
