@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en-US">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,44 +7,33 @@
   <link rel="stylesheet" type="text/css" href="../style.css">
   <script type="text/javascript" src="../convivial_decision_flow.js" defer></script>
 </head>
-
 <body>
   <h1>Custom Functions Example</h1>
   <div class="convivial-decision-flow" id="example-flow">
     <div class="step" id="step-1">
       <h3>Welcome</h3>
-      <button data-df-content="logFunction">Log to Console</button>
-      <a href="#step-2" class="step__answer" data-answer-path="path-1">Next</a>
+      <p id="custom-text">Original text</p>
+      <button data-df-content="updateTextFunction">Update Text</button>
     </div>
-    <div class="step" id="step-2">
-      <h3>Step 2</h3>
-      <button data-df-content="logFunction">Log to Console</button>
-      <div data-dt-filter="logFunction_true">
-        <p>This element is shown based on the custom function filter.</p>
-      </div>
-      <a href="#step-3" class="step__answer" data-answer-path="path-2">Next</a>
+    <div class="convivial-decision-flow__footer">
+      <button class="btn btn-secondary step__button step__button--back">Back</button>
+      <button class="btn btn-secondary step__button step__button--restart">Restart</button>
     </div>
-    <div class="step" id="step-3">
-      <h3>Step 3</h3>
-      <p>End of the flow.</p>
-      <button data-df-content="logFunction">Log to Console</button>
+    <div class="step" id="summary" data-show-summary="true">
+      <h3>Summary</h3>
+      <div data-df-show="history"></div>
+      <div data-df-show="submission"></div>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const dt = new ConvivialDecisionFlow(localStorage, 'example-flow', document.getElementById('example-flow'));
-
-      // Define default functions directly
-      dt._defineDefaultFunctions();
-
-      // Define custom function
-      dt.defineFunction('logFunction', function () {
-        console.log('This is a custom log function');
-        return true; // Return true for the filter to pass
+      dt.defineFunction('content', 'updateTextFunction', function(context, el) {
+        console.log('Executing updateTextFunction');
+        document.getElementById('custom-text').textContent = 'Updated text';
       });
     });
   </script>
 </body>
-
 </html>
