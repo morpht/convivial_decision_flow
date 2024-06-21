@@ -54,7 +54,6 @@ At the end of the decision flow, you can include divs to show a summary of user 
 ```html
 <div class="step" id="summary" data-show-summary="true">
   <h3>Summary</h3>
-  <div class="convivial-decision-flow__summary_infos"></div>
   <div class="convivial-decision-flow__history"></div>
   <div class="convivial-decision-flow__submission"></div>
 </div>
@@ -131,9 +130,8 @@ Create your decision flow using a series of nested `div` elements. Each `div` wi
 
   <div class="step" id="summary" data-show-summary="true">
     <h3>Summary</h3>
-    <div class="convivial-decision-flow__summary_infos"></div>
-    <div class="convivial-decision-flow__history"></div>
-    <div class="convivial-decision-flow__submission"></div>
+    <div data-df-show="history"></div>
+    <div data-df-show="submission"></div>
   </div>
 
   <div class="convivial-decision-flow__footer">
@@ -169,7 +167,7 @@ You can define and store custom functions in the storage and execute them secure
 
 ```javascript
 const dt = new ConvivialDecisionFlow(localStorage, 'example-flow', document.getElementById('example-flow'));
-dt.defineFunction('logFunction', function() {
+dt.defineFunction('content', 'logFunction', function(context, el) {
   console.log('This is a custom log function');
 });
 ```

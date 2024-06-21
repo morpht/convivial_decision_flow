@@ -142,21 +142,6 @@ class ConvivialDecisionFlow {
               infoHTML += document.querySelector('#' + this.config.id + ' #' + el + ' .step__info').innerHTML;
             }
           });
-
-          const summary_element = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__summary');
-          if (summary_element && summary_element.nodeType) {
-            if (summary_element.querySelector('.convivial-decision-flow__summary_infos') !== null) {
-              summary_element.querySelector('.convivial-decision-flow__summary_infos').innerHTML = infoHTML;
-            } else {
-              const divElement = document.createElement('div');
-              divElement.classList.add('convivial-decision-flow__summary_infos');
-              divElement.innerHTML = infoHTML;
-              summary_element.appendChild(divElement);
-              this.filter();
-            }
-          } else {
-            console.warn('Your convivial decision flow with ID ' + this.config.id + ' does not have element with class convivial-decision-flow__summary.');
-          }
         } else {
           this.hide('#' + this.config.id + ' .convivial-decision-flow__summary');
         }
@@ -412,11 +397,6 @@ class ConvivialDecisionFlow {
 
   _cleanHTML() {
     // Clean HTML of all answers and remove styles.
-    document.querySelectorAll('#' + this.config.id + ' .convivial-decision-flow__summary_infos *')
-      .forEach((element) => {
-        element.remove();
-      });
-
     document.querySelectorAll('#' + this.config.id + ' .convivial-decision-flow__summary').forEach((element) => {
       element.removeAttribute('style');
     });
