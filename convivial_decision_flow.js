@@ -596,11 +596,11 @@ class ConvivialDecisionFlow {
     // Save the storage.
     this._saveStorage(this.config.id);
 
-    // Track the attribute.
-    this.trackAttribute(nextStep);
+    // Track the attribute (setting cookie if needed).
+    this.trackAttribute(this.storageData.active);
 
     // Detect if we are on last step and then display summary.
-    this.functions.show.summary();
+    this.functions.show.summary(this);
 
     // Toggle Footer.
     this.toggleFooter();
@@ -690,7 +690,8 @@ class ConvivialDecisionFlow {
     if (step != null) {
       const stepOutcome = step.getAttribute('data-cookie');
       if (stepOutcome !== null) {
-        this.cookie(stepOutcome.split("=")[0], stepOutcome.split("=")[1]);
+        const [name, value] = stepOutcome.split('=');
+        this.cookie(name, value, 7); // Set the cookie with a default expiry of 7 days
       }
     }
   }
