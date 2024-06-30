@@ -138,17 +138,25 @@ class ConvivialDecisionFlow {
           const history = this.storageData.history.slice();
 
           history.forEach((el) => {
-            if (document.querySelector('#' + this.config.id + ' #' + el + ' .step__info')) {
-              infoHTML += document.querySelector('#' + this.config.id + ' #' + el + ' .step__info').innerHTML;
+            const stepElement = document.querySelector('#' + this.config.id + ' #' + el);
+            if (stepElement) {
+              const questionElement = stepElement.querySelector('.step__question');
+              const titleElement = stepElement.querySelector('.step__heading');
+              if (questionElement) {
+                infoHTML += `<dt>${questionElement.textContent.trim()}</dt>`;
+              }
+              if (titleElement) {
+                infoHTML += `<dd>${titleElement.textContent.trim()}</dd>`;
+              }
             }
           });
+
+          const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
+          if (historyElement) {
+            historyElement.innerHTML = `<h3>History</h3><dl>${infoHTML}</dl>`;
+          }
         } else {
           this.hide('#' + this.config.id + ' .convivial-decision-flow__summary');
-        }
-
-        const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
-        if (historyElement) {
-          historyElement.style.display = 'block';
         }
 
         const submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
@@ -157,6 +165,7 @@ class ConvivialDecisionFlow {
         }
       }
     };
+
     this.functions.show.submission = (context, el) => {
       const submissionElement = el;
       if (submissionElement) {
@@ -179,11 +188,8 @@ class ConvivialDecisionFlow {
           }
         });
 
-        submissionElement.innerHTML = '';
-        const submissionContainer = document.createElement('div');
-        submissionContainer.innerHTML = '<h3>Submission</h3>';
-        submissionContainer.appendChild(dlElement);
-        submissionElement.appendChild(submissionContainer);
+        submissionElement.innerHTML = '<h3>Submission</h3>';
+        submissionElement.appendChild(dlElement);
       }
     };
 
