@@ -117,52 +117,9 @@ class ConvivialDecisionFlow {
 
         historyElement.innerHTML = '<h3>History</h3>';
         historyElement.appendChild(dlElement);
-      }
-    };
 
-    this.functions.show.summary = (context, el) => {
-      this._cleanHTML();
-
-      const display_summary_in_step = document.querySelector('#' + this.config.id + ' #' + this.storageData.active).hasAttribute('data-show-summary');
-      let furtherQuestions = document.querySelector('#' + this.config.id + ' #' + this.storageData.active + ' .step__answer');
-
-      if (furtherQuestions != null) {
-        furtherQuestions = furtherQuestions.innerHTML.replace(/<\!--.*?-->/g, '').trim().length;
-      }
-
-      if (furtherQuestions === 0 || furtherQuestions == null || display_summary_in_step) {
-        this.show('#' + this.config.id + ' .convivial-decision-flow__summary');
-
-        let infoHTML = '';
-        if (this.storageData.history) {
-          const history = this.storageData.history.slice();
-
-          history.forEach((el) => {
-            const stepElement = document.querySelector('#' + this.config.id + ' #' + el);
-            if (stepElement) {
-              const questionElement = stepElement.querySelector('.step__question');
-              const titleElement = stepElement.querySelector('.step__heading');
-              if (questionElement) {
-                infoHTML += `<dt>${questionElement.textContent.trim()}</dt>`;
-              }
-              if (titleElement) {
-                infoHTML += `<dd>${titleElement.textContent.trim()}</dd>`;
-              }
-            }
-          });
-
-          const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
-          if (historyElement) {
-            historyElement.innerHTML = `<h3>History</h3><dl>${infoHTML}</dl>`;
-          }
-        } else {
-          this.hide('#' + this.config.id + ' .convivial-decision-flow__summary');
-        }
-
-        const submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
-        if (submissionElement) {
-          submissionElement.style.display = 'block';
-        }
+        // Ensure the history element is visible
+        historyElement.style.display = 'block';
       }
     };
 
@@ -190,6 +147,82 @@ class ConvivialDecisionFlow {
 
         submissionElement.innerHTML = '<h3>Submission</h3>';
         submissionElement.appendChild(dlElement);
+
+        // Ensure the submission element is visible
+        submissionElement.style.display = 'block';
+      }
+    };
+
+
+    this.functions.show.summary = (context, el) => {
+      this._cleanHTML();
+
+      const display_summary_in_step = document.querySelector('#' + this.config.id + ' #' + this.storageData.active).hasAttribute('data-show-summary');
+      let furtherQuestions = document.querySelector('#' + this.config.id + ' #' + this.storageData.active + ' .step__answer');
+
+      if (furtherQuestions != null) {
+        furtherQuestions = furtherQuestions.innerHTML.replace(/<\!--.*?-->/g, '').trim().length;
+      }
+
+      if (furtherQuestions === 0 || furtherQuestions == null || display_summary_in_step) {
+        this.show('#' + this.config.id + ' .convivial-decision-flow__summary');
+
+        let infoHTML = '';
+        if (this.storageData.history && this.storageData.history.length > 1) {
+          const history = this.storageData.history.slice();
+
+          history.forEach((el) => {
+            const stepElement = document.querySelector('#' + this.config.id + ' #' + el);
+            if (stepElement) {
+              const questionElement = stepElement.querySelector('.step__question');
+              const titleElement = stepElement.querySelector('.step__heading');
+              if (questionElement) {
+                infoHTML += `<dt>${questionElement.textContent.trim()}</dt>`;
+              }
+              if (titleElement) {
+                infoHTML += `<dd>${titleElement.textContent.trim()}</dd>`;
+              }
+            }
+          });
+
+          const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
+          if (historyElement) {
+            historyElement.innerHTML = `<h3>History</h3><dl>${infoHTML}</dl>`;
+            historyElement.style.display = 'block';
+          }
+        } else {
+          const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
+          if (historyElement) {
+            historyElement.style.display = 'none';
+          }
+        }
+
+        const submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
+        if (submissionElement) {
+          if (Object.keys(this.storageData.vars).length > 0) {
+            submissionElement.style.display = 'block';
+            const dlElement = document.createElement('dl');
+            Object.keys(this.storageData.vars).forEach(key => {
+              if (!key.endsWith('_label')) {
+                const label = this.storageData.vars[key + '_label'] || key;
+                const value = this.storageData.vars[key];
+
+                const dtElement = document.createElement('dt');
+                dtElement.textContent = label;
+
+                const ddElement = document.createElement('dd');
+                ddElement.textContent = this._capitalizeFirstLetter(value);
+
+                dlElement.appendChild(dtElement);
+                dlElement.appendChild(ddElement);
+              }
+            });
+            submissionElement.innerHTML = '<h3>Submission</h3>';
+            submissionElement.appendChild(dlElement);
+          } else {
+            submissionElement.style.display = 'none';
+          }
+        }
       }
     };
 
@@ -608,6 +641,17 @@ class ConvivialDecisionFlow {
     // Detect if we are on last step and then display summary.
     this.functions.show.summary(this);
 
+    // Ensure history and submission sections are updated immediately
+    const historyElement = document.querySelector('#' + this.config.id + ' [data-df-show="history"]');
+    if (historyElement) {
+      this.executeFunction('show', 'history', historyElement);
+    }
+
+    const submissionElement = document.querySelector('#' + this.config.id + ' [data-df-show="submission"]');
+    if (submissionElement) {
+      this.executeFunction('show', 'submission', submissionElement);
+    }
+
     // Toggle Footer.
     this.toggleFooter();
   }
@@ -671,8 +715,9 @@ class ConvivialDecisionFlow {
     // Send first step data to GA.
     this.trackGA(this.storageData.active);
 
-    // Wipe out history.
+    // Wipe out history and vars.
     this.storageData.history = [this.config.first_step];
+    this.storageData.vars = {};
 
     // Save the storage.
     this._saveStorage();
@@ -685,6 +730,17 @@ class ConvivialDecisionFlow {
 
     // Clean HTML from added elements.
     this._cleanHTML();
+
+    // Hide the history and submission sections on restart
+    const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
+    if (historyElement) {
+      historyElement.style.display = 'none';
+    }
+
+    const submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
+    if (submissionElement) {
+      submissionElement.style.display = 'none';
+    }
   }
 
   /**
@@ -768,7 +824,20 @@ document.addEventListener('DOMContentLoaded', function () {
   // Initialize the convivial decision flow object for all convivial decision flows.
   document.querySelectorAll('.convivial-decision-flow').forEach((el) => {
     if (el.hasAttribute('id')) {
-      new ConvivialDecisionFlow(localStorage, el.id, el); // Use localStorage or sessionStorage as needed
+      const dt = new ConvivialDecisionFlow(localStorage, el.id, el); // Use localStorage or sessionStorage as needed
+
+      // Hide the history and submission sections on page load if no data
+      const historyElement = document.querySelector('.convivial-decision-flow__history');
+      if (historyElement) {
+        const hasHistory = dt.storageData.history && dt.storageData.history.length > 1;
+        historyElement.style.display = hasHistory ? 'block' : 'none';
+      }
+
+      const submissionElement = document.querySelector('.convivial-decision-flow__submission');
+      if (submissionElement) {
+        const hasSubmissions = Object.keys(dt.storageData.vars).length > 0;
+        submissionElement.style.display = hasSubmissions ? 'block' : 'none';
+      }
     } else {
       console.warn('Convivial decision flow does not have ID.');
     }

@@ -30,7 +30,6 @@
     document.addEventListener('DOMContentLoaded', function () {
       const dt = new ConvivialDecisionFlow(localStorage, 'example-flow', document.getElementById('example-flow'));
       dt.defineFunction('content', 'updateTextFunction', function(context, el) {
-        console.log('Executing updateTextFunction');
         document.getElementById('custom-text').textContent = 'Updated text';
       });
     });
