@@ -97,7 +97,7 @@ class ConvivialDecisionFlow {
 
     this.functions.show.history = (context, el) => {
       const historyElement = el;
-      if (historyElement) {
+      if (this.storageData.history.length > 1 && historyElement) {
         const dlElement = document.createElement('dl');
 
         this.storageData.history.forEach(stepId => {
@@ -125,12 +125,14 @@ class ConvivialDecisionFlow {
 
     this.functions.show.submission = (context, el) => {
       const submissionElement = el;
+      const submissions = this.storageData.vars;
       if (submissionElement) {
-        const submissions = this.storageData.vars;
+        let hasSubmissions = false;
         const dlElement = document.createElement('dl');
 
         Object.keys(submissions).forEach(key => {
           if (!key.endsWith('_label')) {
+            hasSubmissions = true;
             const label = submissions[key + '_label'] || key;
             const value = submissions[key];
 
@@ -144,6 +146,11 @@ class ConvivialDecisionFlow {
             dlElement.appendChild(ddElement);
           }
         });
+
+        if (!hasSubmissions) {
+          submissionElement.style.display = 'none';
+          return;
+        }
 
         submissionElement.innerHTML = '<h3>Submission</h3>';
         submissionElement.appendChild(dlElement);
