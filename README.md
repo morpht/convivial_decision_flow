@@ -24,7 +24,7 @@ The library now supports both local and session storage for saving user progress
 
 ### Custom Function Execution
 
-You can now define and store custom functions in the selected storage. These functions can be executed securely using the `data-df-content` attribute. This feature helps in extending the functionality of the decision flow dynamically.
+You can now define and store custom functions in the selected storage. These functions can be executed securely using the `data-df-show` attribute. This feature helps in extending the functionality of the decision flow dynamically.
 
 ### Form Handling
 
@@ -52,7 +52,7 @@ Automatically generate summaries of user choices and display them in a designate
 At the end of the decision flow, you can include divs to show a summary of user choices, the history of steps taken, and submission data. This can be configured in the HTML structure:
 
 ```html
-<div class="step" id="summary" data-show-summary="true">
+<div class="step" id="summary">
   <h3>Summary</h3>
   <div class="convivial-decision-flow__history"></div>
   <div class="convivial-decision-flow__submission"></div>
@@ -179,8 +179,8 @@ _initializeFunctionCalls() {
     }
   });
 
-  document.querySelectorAll(`#${this.config.id} [data-df-content]`).forEach((element) => {
-    const functionName = element.getAttribute('data-df-content');
+  document.querySelectorAll(`#${this.config.id} [data-df-show]`).forEach((element) => {
+    const functionName = element.getAttribute('data-df-show');
     if (functionName) {
       // Validate the function name
       const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
@@ -251,7 +251,7 @@ Create your decision flow using a series of nested `div` elements. Each `div` wi
     <p>You selected Option 2.</p>
   </div>
 
-  <div class="step" id="summary" data-show-summary="true">
+  <div class="step" id="summary">
     <h3>Summary</h3>
     <div data-df-show="history"></div>
     <div data-df-show="submission"></div>
@@ -297,10 +297,10 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 ```
 
-2. Execute the function using the `data-df-content` attribute:
+2. Execute the function using the `data-df-show` attribute:
 
 ```html
-<button data-df-content="updateTextFunction">Update Text</button>
+<button data-df-show="updateTextFunction">Update Text</button>
 ```
 
 ## How to Compress the JS File

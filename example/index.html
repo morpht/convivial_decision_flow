@@ -204,9 +204,10 @@
         </div>
 
         <!-- Summary and Footer -->
-        <div class="convivial-decision-flow__summary" data-show-summary="true">
+        <div class="convivial-decision-flow__summary">
             <div data-df-show="history"></div>
             <div data-df-show="submission"></div>
+            <div data-df-show="yearsUntil100"></div>
         </div>
         <div class="convivial-decision-flow__footer">
             <button class="btn btn-secondary step__button step__button--back">Back</button>
@@ -221,6 +222,12 @@
                 console.log(flow);
                 if (flow.id) {
                     const dt = new ConvivialDecisionFlow(localStorage, flow.id, flow); // Modify as needed to use 'session' or 'local'
+                    console.log(dt.functions);
+                    // New Custom function.
+                    dt.functions.show['yearsUntil100'] = function (context, el) {
+                        console.log('yearsUntil100', context);
+                    };
+                    console.log(dt.functions);
                 } else {
                     console.warn('Convivial decision flow does not have an ID.');
                 }

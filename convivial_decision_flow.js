@@ -101,7 +101,6 @@ class ConvivialDecisionFlow {
 
     this.functions.show = {};
     this.functions.filter = {};
-    this.functions.content = {};
 
     this.functions.show.history = (context, el) => {
       const historyElement = el;
@@ -171,15 +170,13 @@ class ConvivialDecisionFlow {
 
     this.functions.show.summary = (context, el) => {
       this._cleanHTML();
-
-      const display_summary_in_step = document.querySelector('#' + this.config.id + ' #' + this.storageData.active).hasAttribute('data-show-summary');
       let furtherQuestions = document.querySelector('#' + this.config.id + ' #' + this.storageData.active + ' .step__answer');
 
       if (furtherQuestions != null) {
         furtherQuestions = furtherQuestions.innerHTML.replace(/<\!--.*?-->/g, '').trim().length;
       }
 
-      if (furtherQuestions === 0 || furtherQuestions == null || display_summary_in_step) {
+      if (furtherQuestions === 0 || furtherQuestions == null) {
         this.show('#' + this.config.id + ' .convivial-decision-flow__summary');
 
         let infoHTML = '';
@@ -804,7 +801,7 @@ class ConvivialDecisionFlow {
   }
 
   /**
-   * Initialize custom function calls based on data-df-content attribute.
+   * Initialize custom function calls based on data-df-show attribute.
    */
   _initializeFunctionCalls() {
     document.querySelectorAll(`#${this.config.id} [data-df-show]`).forEach((element) => {
@@ -815,30 +812,6 @@ class ConvivialDecisionFlow {
         if (validName) {
           console.log(`Executing show function: ${functionName}`);
           this.executeFunction('show', functionName, element);
-        } else {
-          console.warn(`Invalid function name: ${functionName}`);
-        }
-      }
-    });
-
-    document.querySelectorAll(`#${this.config.id} [data-df-content]`).forEach((element) => {
-      const functionName = element.getAttribute('data-df-content');
-      if (functionName) {
-        // Validate the function name
-        const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
-        if (validName) {
-          console.log(`Adding event listener for content function: ${functionName}`);
-
-          // Use a data attribute to track if the event listener has already been added
-          if (!element.hasAttribute('data-listener-added')) {
-            element.addEventListener('click', () => {
-              console.log(`Executing content function: ${functionName}`);
-              this.executeFunction('content', functionName, element);
-            });
-
-            // Mark this element as having the listener added
-            element.setAttribute('data-listener-added', 'true');
-          }
         } else {
           console.warn(`Invalid function name: ${functionName}`);
         }
