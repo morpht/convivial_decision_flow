@@ -161,21 +161,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
 ### Define and Execute Custom Functions
 
-You can define and store custom functions in the storage and execute them securely. Here's how:
+You can define and store custom functions in the `functions` property map and execute them securely. Here's how:
 
 1. Define a function in the JavaScript:
 
 ```javascript
-const dt = new ConvivialDecisionFlow(localStorage, 'example-flow', document.getElementById('example-flow'));
-dt.defineFunction('content', 'logFunction', function(context, el) {
-  console.log('This is a custom log function');
+document.addEventListener('DOMContentLoaded', function () {
+  const dt = new ConvivialDecisionFlow(localStorage, 'example-flow', document.getElementById('example-flow'));
+  dt.functions.content['updateTextFunction'] = function (context, el) {
+    document.getElementById('custom-text').textContent = 'Updated text';
+  };
 });
 ```
 
 2. Execute the function using the `data-df-content` attribute:
 
 ```html
-<button data-df-content="logFunction">Log to Console</button>
+<button data-df-content="updateTextFunction">Update Text</button>
 ```
 
 ## How to Compress the JS File
