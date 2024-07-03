@@ -75,7 +75,8 @@ class ConvivialDecisionFlow {
    */
   executeFunction(type, name, el, args = []) {
     if (!this.functions[type] || !this.functions[type][name]) {
-      throw new Error(`Function "${name}" not found in ${type}`);
+      console.warn(`Function "${name}" not found in ${type}. Skipping execution.`);
+      return;
     }
 
     // Validate that the function name is safe to use
@@ -569,12 +570,38 @@ class ConvivialDecisionFlow {
       }
       if (elem && elem.nodeType) {
         elem.style.display = 'revert';
+        this._executeCustomShowFunctions(elem); // Execute show functions if any
         return true;
       }
     } catch (e) {
       console.warn('Please check convivial decision flow ' + this.config.id + '. Incorrect HTML structure.');
     }
     return false;
+  }
+
+  /**
+   * Execute show functions.
+   */
+  _executeCustomShowFunctions(elem) {
+    const elementsWithShow = elem.querySelectorAll('[data-df-show]');
+
+    elementsWithShow.forEach((element) => {
+      const functionName = element.getAttribute('data-df-show');
+      if (functionName && functionName !== 'history' && functionName !== 'submission') {
+        // Validate the function name
+        const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
+        if (validName) {
+          if (this.functions.show && this.functions.show[functionName]) {
+            console.log(`Executing show function: ${functionName}`);
+            this.executeFunction('show', functionName, element);
+          } else {
+            console.warn(`Show function "${functionName}" not defined yet. Skipping execution.`);
+          }
+        } else {
+          console.warn(`Invalid function name: ${functionName}`);
+        }
+      }
+    });
   }
 
   /**
@@ -810,8 +837,12 @@ class ConvivialDecisionFlow {
         // Validate the function name
         const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
         if (validName) {
-          console.log(`Executing show function: ${functionName}`);
-          this.executeFunction('show', functionName, element);
+          if (this.functions.show && this.functions.show[functionName]) {
+            console.log(`Executing show function: ${functionName}`);
+            this.executeFunction('show', functionName, element);
+          } else {
+            console.warn(`Show function "${functionName}" not defined yet. Skipping execution.`);
+          }
         } else {
           console.warn(`Invalid function name: ${functionName}`);
         }

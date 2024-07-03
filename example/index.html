@@ -221,13 +221,13 @@
             document.querySelectorAll('.convivial-decision-flow').forEach(function (flow) {
                 console.log(flow);
                 if (flow.id) {
-                    const dt = new ConvivialDecisionFlow(localStorage, flow.id, flow); // Modify as needed to use 'session' or 'local'
-                    console.log(dt.functions);
+                    const dt = new ConvivialDecisionFlow(localStorage, flow.id, flow); 
                     // New Custom function.
                     dt.functions.show['yearsUntil100'] = function (context, el) {
-                        console.log('yearsUntil100', context);
+                        const age = context.storageData.vars.age || 0;
+                        const yearsUntil100 = 100 - age;
+                        el.innerHTML = `<h4>You have ${yearsUntil100} years until you turn 100.</h4>`;
                     };
-                    console.log(dt.functions);
                 } else {
                     console.warn('Convivial decision flow does not have an ID.');
                 }
