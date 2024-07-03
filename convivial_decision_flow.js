@@ -94,6 +94,7 @@ class ConvivialDecisionFlow {
 
     this.functions.show = {};
     this.functions.filter = {};
+    this.functions.content = {};
 
     this.functions.show.history = (context, el) => {
       const historyElement = el;
