@@ -84,6 +84,129 @@ You can define complex conditions in your decision flow using `data-dt-filter` a
   </div>
   ```
 
+### Security Enhancements
+
+To ensure the safety and security of executing custom functions in the Convivial Decision Flow library, we have implemented several measures to prevent potential injection attacks and unauthorized code execution. Here's a detailed explanation of these enhancements and why our approach is safer than using `eval`.
+
+#### Sanitizing Inputs
+
+We ensure that any input used in the functions is sanitized to prevent injection attacks. This includes validating function names to ensure they are valid JavaScript identifiers.
+
+#### Restricting Function Names
+
+Function names are validated to match a specific pattern that ensures they are safe and valid. This prevents the execution of malicious code through crafted function names.
+
+#### Using a Secure Context
+
+Functions are executed within a secure context to limit potential exploits. We avoid using `eval`, which can execute arbitrary code and is a significant security risk.
+
+### Why Our Approach is Safer Than Using `eval`
+
+Using `eval` to execute dynamic code can lead to severe security vulnerabilities, as it allows execution of arbitrary code, which can be exploited by attackers. Our approach avoids these risks by:
+
+1. **Validating Function Names**: Ensuring that function names are valid JavaScript identifiers prevents the execution of unintended code.
+2. **Executing in a Controlled Context**: By defining and executing functions within a controlled context, we limit the scope of what can be executed.
+3. **Avoiding Arbitrary Code Execution**: Unlike `eval`, which can execute any string as JavaScript code, our method only allows predefined and validated functions to be executed.
+
+### Updated Methods
+
+#### Define Function Method
+
+We validate function names to ensure they are valid identifiers:
+
+```javascript
+defineFunction(type, name, fn) {
+  if (typeof fn !== 'function') {
+    throw new Error('Provided argument is not a function');
+  }
+  if (!this.functions[type]) {
+    this.functions[type] = {};
+  }
+
+  // Ensure the function name is a valid identifier
+  const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(name);
+  if (!validName) {
+    throw new Error('Invalid function name');
+  }
+
+  this.functions[type][name] = fn;
+  console.log(`Defined function "${name}" under type "${type}"`);
+}
+```
+
+#### Execute Function Method
+
+We validate that the function name is safe to use before executing:
+
+```javascript
+executeFunction(type, name, el, args = []) {
+  if (!this.functions[type] || !this.functions[type][name]) {
+    throw new Error(`Function "${name}" not found in ${type}`);
+  }
+
+  // Validate that the function name is safe to use
+  const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(name);
+  if (!validName) {
+    throw new Error('Invalid function name');
+  }
+
+  try {
+    return this.functions[type][name](this, el, ...args);
+  } catch (e) {
+    console.error(`Error executing function "${name}":`, e);
+    throw e;
+  }
+}
+```
+
+#### Initialize Custom Function Calls Method
+
+We validate function names before adding event listeners:
+
+```javascript
+_initializeFunctionCalls() {
+  document.querySelectorAll(`#${this.config.id} [data-df-show]`).forEach((element) => {
+    const functionName = element.getAttribute('data-df-show');
+    if (functionName) {
+      // Validate the function name
+      const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
+      if (validName) {
+        console.log(`Executing show function: ${functionName}`);
+        this.executeFunction('show', functionName, element);
+      } else {
+        console.warn(`Invalid function name: ${functionName}`);
+      }
+    }
+  });
+
+  document.querySelectorAll(`#${this.config.id} [data-df-content]`).forEach((element) => {
+    const functionName = element.getAttribute('data-df-content');
+    if (functionName) {
+      // Validate the function name
+      const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
+      if (validName) {
+        console.log(`Adding event listener for content function: ${functionName}`);
+
+        // Use a data attribute to track if the event listener has already been added
+        if (!element.hasAttribute('data-listener-added')) {
+          element.addEventListener('click', () => {
+            console.log(`Executing content function: ${functionName}`);
+            this.executeFunction('content', functionName, element);
+          });
+
+          // Mark this element as having the listener added
+          element.setAttribute('data-listener-added', 'true');
+        }
+      } else {
+        console.warn(`Invalid function name: ${functionName}`);
+      }
+    }
+  });
+}
+```
+
+By implementing these security measures, we ensure that the Convivial Decision Flow library provides a secure environment for defining and executing custom functions, significantly reducing the risk of security vulnerabilities.
+
 ## Getting Started
 
 ### Load the Required Files

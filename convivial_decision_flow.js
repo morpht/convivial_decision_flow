@@ -77,6 +77,13 @@ class ConvivialDecisionFlow {
     if (!this.functions[type] || !this.functions[type][name]) {
       throw new Error(`Function "${name}" not found in ${type}`);
     }
+
+    // Validate that the function name is safe to use
+    const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(name);
+    if (!validName) {
+      throw new Error('Invalid function name');
+    }
+
     try {
       return this.functions[type][name](this, el, ...args);
     } catch (e) {
@@ -803,25 +810,37 @@ class ConvivialDecisionFlow {
     document.querySelectorAll(`#${this.config.id} [data-df-show]`).forEach((element) => {
       const functionName = element.getAttribute('data-df-show');
       if (functionName) {
-        console.log(`Executing show function: ${functionName}`);
-        this.executeFunction('show', functionName, element);
+        // Validate the function name
+        const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
+        if (validName) {
+          console.log(`Executing show function: ${functionName}`);
+          this.executeFunction('show', functionName, element);
+        } else {
+          console.warn(`Invalid function name: ${functionName}`);
+        }
       }
     });
 
     document.querySelectorAll(`#${this.config.id} [data-df-content]`).forEach((element) => {
       const functionName = element.getAttribute('data-df-content');
       if (functionName) {
-        console.log(`Adding event listener for content function: ${functionName}`);
+        // Validate the function name
+        const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
+        if (validName) {
+          console.log(`Adding event listener for content function: ${functionName}`);
 
-        // Use a data attribute to track if the event listener has already been added
-        if (!element.hasAttribute('data-listener-added')) {
-          element.addEventListener('click', () => {
-            console.log(`Executing content function: ${functionName}`);
-            this.executeFunction('content', functionName, element);
-          });
+          // Use a data attribute to track if the event listener has already been added
+          if (!element.hasAttribute('data-listener-added')) {
+            element.addEventListener('click', () => {
+              console.log(`Executing content function: ${functionName}`);
+              this.executeFunction('content', functionName, element);
+            });
 
-          // Mark this element as having the listener added
-          element.setAttribute('data-listener-added', 'true');
+            // Mark this element as having the listener added
+            element.setAttribute('data-listener-added', 'true');
+          }
+        } else {
+          console.warn(`Invalid function name: ${functionName}`);
         }
       }
     });
