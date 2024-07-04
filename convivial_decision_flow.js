@@ -27,8 +27,13 @@ class ConvivialDecisionFlow {
 
       this.storageData = this._loadStorage(id);
       this._defineDefaultFunctions();
-      this.activate();
-      this.initializeForms();
+
+      // Set up delayed initialization
+      window.addEventListener('load', () => {
+        this.activate();
+        this.initializeForms();
+        this._initializeFunctionCalls();
+      });
 
       document.querySelectorAll('#' + id + ' .step .step__answer').forEach((answer) => {
         if (answer.hasAttribute('href')) {
@@ -46,26 +51,6 @@ class ConvivialDecisionFlow {
     } else {
       throw new Error('Please follow proper HTML structure.');
     }
-  }
-
-  /**
-   * Define a custom function.
-   * 
-   * @param {string} type - The type of the function (show, filter, etc.).
-   * @param {string} name - The name of the function.
-   * @param {Function} fn - The function to define.
-   * @throws {Error} - If the provided argument is not a function.
-   * @returns {void}
-   */
-  defineFunction(type, name, fn) {
-    if (typeof fn !== 'function') {
-      throw new Error('Provided argument is not a function');
-    }
-    if (!this.functions[type]) {
-      this.functions[type] = {};
-    }
-    this.functions[type][name] = fn;
-    console.log(`Defined function "${name}" under type "${type}"`);
   }
 
   /**
@@ -333,6 +318,14 @@ class ConvivialDecisionFlow {
       const nextStep = form.getAttribute('action').replace('#', '');
       this.trackAnswer(nextStep);
       this.filter();
+
+      // Execute custom show functions for elements with data-df-show attribute
+      document.querySelectorAll(`#${this.config.id} [data-df-show]`).forEach((element) => {
+        const functionName = element.getAttribute('data-df-show');
+        if (functionName && this.functions.show && this.functions.show[functionName]) {
+          this.executeFunction('show', functionName, element);
+        }
+      });
     };
 
     this.definingDefaultFunctions = false;
@@ -524,9 +517,6 @@ class ConvivialDecisionFlow {
         submissionElement.style.display = 'none';
       }
 
-      // Initialize custom function calls
-      this._initializeFunctionCalls();
-
       // Save the storage.
       this._saveStorage();
     } catch (e) {
@@ -620,12 +610,6 @@ class ConvivialDecisionFlow {
       } else {
         this.hide(element);
       }
-    });
-  }
-
-  is_in_history(filter_array) {
-    return filter_array.split(' ').every((object) => {
-      return this.storageData.history.includes(object);
     });
   }
 
@@ -784,7 +768,7 @@ class ConvivialDecisionFlow {
     // Clean HTML from added elements.
     this._cleanHTML();
 
-    // Hide and clear the elements with the data-df-show attribute on restart
+    // Hide and clear the elements with the data-df-show attribute on restart without executing show functions
     document.querySelectorAll('#' + this.config.id + ' [data-df-show]').forEach((element) => {
       element.innerHTML = '';
       element.style.display = 'none';
