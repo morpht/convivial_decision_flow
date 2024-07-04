@@ -30,15 +30,19 @@ class ConvivialDecisionFlow {
       this.activate();
       this.initializeForms();
 
-      document.querySelectorAll('#' + id + ' .step .step__answer')
-        .forEach((answer) => {
-          if (answer.hasAttribute('href')) {
-            answer.addEventListener('click', () => {
-              this.filter();
-              this.trackAnswer(answer.attributes.href.value.replace('#', ''), answer.hasAttribute('data-answer-path') ? answer.attributes['data-answer-path'].value : false);
-            });
-          }
-        }, this);
+      document.querySelectorAll('#' + id + ' .step .step__answer').forEach((answer) => {
+        if (answer.hasAttribute('href')) {
+          answer.addEventListener('click', (event) => {
+            event.preventDefault();
+            // Mark the selected answer
+            document.querySelectorAll('#' + id + ' .step .step__answer').forEach(a => a.removeAttribute('data-selected'));
+            answer.setAttribute('data-selected', 'true');
+
+            this.filter();
+            this.trackAnswer(answer.attributes.href.value.replace('#', ''), answer.hasAttribute('data-answer-path') ? answer.attributes['data-answer-path'].value : false);
+          });
+        }
+      }, this);
     } else {
       throw new Error('Please follow proper HTML structure.');
     }
@@ -108,17 +112,18 @@ class ConvivialDecisionFlow {
       if (this.storageData.history.length > 1 && historyElement) {
         const dlElement = document.createElement('dl');
 
+        // Iterate through the history and capture question-answer pairs
         this.storageData.history.forEach(stepId => {
-          if (stepId != this.config.first_step) {
-            const stepElement = document.querySelector(`#${this.config.id} #${stepId}`);
-            const questionElement = stepElement.querySelector('.step__question');
-            const dtElement = document.createElement('dt');
-            dtElement.textContent = questionElement ? questionElement.textContent.trim() : '';
-            dlElement.appendChild(dtElement);
+          const stepElement = document.querySelector(`#${this.config.id} #${stepId}`);
+          const questionElement = stepElement.querySelector('.step__question');
 
-            const titleElement = stepElement.querySelector('.step__heading');
+          const dtElement = document.createElement('dt');
+          dtElement.textContent = questionElement ? questionElement.textContent.trim() : '';
+          dlElement.appendChild(dtElement);
+
+          if (this.storageData.answers && this.storageData.answers[stepId]) {
             const ddElement = document.createElement('dd');
-            ddElement.textContent = titleElement ? titleElement.textContent.trim() : '';
+            ddElement.textContent = this.storageData.answers[stepId];
             dlElement.appendChild(ddElement);
           }
         });
@@ -570,7 +575,7 @@ class ConvivialDecisionFlow {
       }
       if (elem && elem.nodeType) {
         elem.style.display = 'revert';
-        this._executeCustomShowFunctions(elem); // Execute show functions if any
+        this._executeShowFunctions(elem); // Execute show functions if any
         return true;
       }
     } catch (e) {
@@ -582,12 +587,12 @@ class ConvivialDecisionFlow {
   /**
    * Execute show functions.
    */
-  _executeCustomShowFunctions(elem) {
+  _executeShowFunctions(elem) {
     const elementsWithShow = elem.querySelectorAll('[data-df-show]');
 
     elementsWithShow.forEach((element) => {
       const functionName = element.getAttribute('data-df-show');
-      if (functionName && functionName !== 'history' && functionName !== 'submission') {
+      if (functionName) {
         // Validate the function name
         const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
         if (validName) {
@@ -652,6 +657,14 @@ class ConvivialDecisionFlow {
     // Track click on answer.
     if (datakey) {
       this.trackGA(this.storageData.active + '/' + datakey);
+    }
+
+    // Store the selected answer in the storageData
+    const activeStepElement = document.querySelector('#' + this.config.id + ' #' + this.storageData.active);
+    const selectedAnswerElement = activeStepElement.querySelector('.step__answer[data-selected="true"]');
+    if (selectedAnswerElement) {
+      this.storageData.answers = this.storageData.answers || {};
+      this.storageData.answers[this.storageData.active] = selectedAnswerElement.textContent.trim();
     }
 
     // Hide current/active step.

@@ -31,7 +31,7 @@
             </ul>
         </div>
         <div class="step" id="bookshop-find">
-            <h3 class="step__heading">Let's see if we can find something for you</h3>
+            <h3 class="step__heading">Shopping</h3>
             <p>We have a wide range of topics suitable for you.</p>
             <h4 class="step__question">What is your interest?</h4>
             <ul>
@@ -56,9 +56,6 @@
                     </a>
                 </li>
             </ul>
-            <div>
-                <p>You came here today to shop.</p>
-            </div>
         </div>
         <div class="step" id="bookshop-education" data-cookie="outcome=bookshop-education">
             <h3 class="step__heading">Find out about the Bookstore</h3>
@@ -70,7 +67,7 @@
             <p>We have a large selection of sci-fi books available for purchase. Please visit the sci-fi section of the
                 bookstore to browse the titles.</p>
         </div>
-        <div class="step" id="bookshop-fantasy" data-cookie="outcome=bookshop-fantasy" data-pass-filter="">
+        <div class="step" id="bookshop-fantasy" data-cookie="outcome=bookshop-fantasy">
             <h3 class="step__heading">Fantasy</h3>
             <p>We have a large range of fantasy books for purchase. Please visit the fantasy section of the bookstore to
                 browse the titles.</p>
@@ -86,9 +83,7 @@
         </div>
 
         <!-- Summary and Footer -->
-        <div class="convivial-decision-flow__summary">
-            <div data-df-show="history"></div>
-        </div>
+        <div data-df-show="history"></div>
         <div class="convivial-decision-flow__footer">
             <button class="btn btn-secondary step__button step__button--back">Back</button>
             <button class="btn btn-secondary step__button step__button--restart">Restart</button>
@@ -104,13 +99,13 @@
             <div>
                 <p>To start, please tell us your nationality and age:</p>
                 <form class="dt-form" action="#bar-age-based">
-                    <label class="step__question" for="nationality">Your nationality:</label>
+                    <label for="nationality">Your nationality:</label>
                     <select name="nationality" required>
                         <option value="australian">Australian</option>
                         <option value="czech">Czech</option>
                         <option value="japanese">Japanese</option>
                     </select>
-                    <label class="step__question" for="age">Your age:</label>
+                    <label for="age">Your age:</label>
                     <input type="number" name="age" placeholder="Your age" required>
                     <input type="submit" value="Next">
                 </form>
@@ -204,11 +199,10 @@
         </div>
 
         <!-- Summary and Footer -->
-        <div class="convivial-decision-flow__summary">
-            <div data-df-show="history"></div>
-            <div data-df-show="submission"></div>
-            <div data-df-show="yearsUntil100"></div>
-        </div>
+        <div data-df-show="history"></div>
+        <div data-df-show="submission"></div>
+        <div data-df-show="yearsUntil100"></div>
+
         <div class="convivial-decision-flow__footer">
             <button class="btn btn-secondary step__button step__button--back">Back</button>
             <button class="btn btn-secondary step__button step__button--restart">Restart</button>
