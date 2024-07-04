@@ -770,6 +770,7 @@ class ConvivialDecisionFlow {
     // Wipe out history and vars.
     this.storageData.history = [this.config.first_step];
     this.storageData.vars = {};
+    this.storageData.answers = {};  // Clear the stored answers
 
     // Save the storage.
     this._saveStorage();
@@ -783,16 +784,11 @@ class ConvivialDecisionFlow {
     // Clean HTML from added elements.
     this._cleanHTML();
 
-    // Hide the history and submission sections on restart
-    const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
-    if (historyElement) {
-      historyElement.style.display = 'none';
-    }
-
-    const submissionElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__submission');
-    if (submissionElement) {
-      submissionElement.style.display = 'none';
-    }
+    // Hide and clear the elements with the data-df-show attribute on restart
+    document.querySelectorAll('#' + this.config.id + ' [data-df-show]').forEach((element) => {
+      element.innerHTML = '';
+      element.style.display = 'none';
+    });
   }
 
   /**
