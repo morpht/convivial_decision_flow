@@ -4,22 +4,31 @@ A JavaScript library for creating interactive convivial decision flows.
 
 ## Overview
 
-The Convivial Decision Flow library allows you to create dynamic, interactive convivial decision flows on your web pages. Users can navigate through a series of steps based on their choices, with the ability to store progress and display summaries of their selections.
+The Convivial Decision Flow library allows you to create dynamic, interactive decision flows on your web pages. Users can navigate through a series of steps based on their choices, with the ability to store progress and display summaries of their selections.
 
 ## Features
 
 - **Interactive Steps**: Guide users through a series of steps with clickable answers.
 - **Form Handling**: Collect user input through forms and navigate based on their responses.
-- **Local Storage**: Save user progress in local storage to maintain state across sessions.
+- **Storage Options**: Save user progress in local or session storage to maintain state across sessions.
 - **Dynamic Filtering**: Show or hide content based on user input using custom filters.
 - **Summary Display**: Automatically generate and display a summary of user choices at the end.
-- **Back and Restart Navigation**: Allow users to navigate backward and restart the convivial decision flow.
+- **Back and Restart Navigation**: Allow users to navigate backward and restart the decision flow.
+- **Custom Function Execution**: Define and execute custom functions securely from storage.
 
 ## New Features
 
+### Storage Options
+
+The library now supports both local and session storage for saving user progress. You can choose the type of storage by specifying it when initializing the `ConvivialDecisionFlow` instance.
+
+### Custom Function Execution
+
+You can now define and store custom functions in the selected storage. These functions can be executed securely using the `data-df-show` attribute. This feature helps in extending the functionality of the decision flow dynamically.
+
 ### Form Handling
 
-The library now supports handling form submissions within the convivial decision flow. Forms can collect user input and navigate to the next step based on the form's action attribute.
+The library supports handling form submissions within the decision flow. Forms can collect user input and navigate to the next step based on the form's action attribute.
 
 ### Dynamic Filtering
 
@@ -34,18 +43,17 @@ You can use data attributes to dynamically show or hide content based on user in
 
 Automatically generate summaries of user choices and display them in a designated section. The summary includes:
 
-- **Summary of Choices**: A list of all the user's choices throughout the convivial decision flow.
+- **Summary of Choices**: A list of all the user's choices throughout the decision flow.
 - **History**: Display the steps the user has taken.
 - **Submission Data**: Show collected form data.
 
 ### Example of Summary Divs
 
-At the end of the convivial decision flow, you can include divs to show a summary of user choices, the history of steps taken, and submission data. This can be configured in the HTML structure:
+At the end of the decision flow, you can include divs to show a summary of user choices, the history of steps taken, and submission data. This can be configured in the HTML structure:
 
 ```html
-<div class="step" id="summary" data-show-summary="true">
+<div class="step" id="summary">
   <h3>Summary</h3>
-  <div class="convivial-decision-flow__summary_infos"></div>
   <div class="convivial-decision-flow__history"></div>
   <div class="convivial-decision-flow__submission"></div>
 </div>
@@ -53,7 +61,7 @@ At the end of the convivial decision flow, you can include divs to show a summar
 
 ### Complex Conditions
 
-You can define complex conditions in your convivial decision flow using `data-dt-filter` attributes. The following examples illustrate how to use AND (`+`) and OR (`,`):
+You can define complex conditions in your decision flow using `data-dt-filter` attributes. The following examples illustrate how to use AND (`+`) and OR (`,`):
 
 - **Logical AND**: All conditions must be true.
   ```html
@@ -76,6 +84,129 @@ You can define complex conditions in your convivial decision flow using `data-dt
   </div>
   ```
 
+### Security Enhancements
+
+To ensure the safety and security of executing custom functions in the Convivial Decision Flow library, we have implemented several measures to prevent potential injection attacks and unauthorized code execution. Here's a detailed explanation of these enhancements and why our approach is safer than using `eval`.
+
+#### Sanitizing Inputs
+
+We ensure that any input used in the functions is sanitized to prevent injection attacks. This includes validating function names to ensure they are valid JavaScript identifiers.
+
+#### Restricting Function Names
+
+Function names are validated to match a specific pattern that ensures they are safe and valid. This prevents the execution of malicious code through crafted function names.
+
+#### Using a Secure Context
+
+Functions are executed within a secure context to limit potential exploits. We avoid using `eval`, which can execute arbitrary code and is a significant security risk.
+
+### Why Our Approach is Safer Than Using `eval`
+
+Using `eval` to execute dynamic code can lead to severe security vulnerabilities, as it allows execution of arbitrary code, which can be exploited by attackers. Our approach avoids these risks by:
+
+1. **Validating Function Names**: Ensuring that function names are valid JavaScript identifiers prevents the execution of unintended code.
+2. **Executing in a Controlled Context**: By defining and executing functions within a controlled context, we limit the scope of what can be executed.
+3. **Avoiding Arbitrary Code Execution**: Unlike `eval`, which can execute any string as JavaScript code, our method only allows predefined and validated functions to be executed.
+
+### Updated Methods
+
+#### Define Function Method
+
+We validate function names to ensure they are valid identifiers:
+
+```javascript
+defineFunction(type, name, fn) {
+  if (typeof fn !== 'function') {
+    throw new Error('Provided argument is not a function');
+  }
+  if (!this.functions[type]) {
+    this.functions[type] = {};
+  }
+
+  // Ensure the function name is a valid identifier
+  const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(name);
+  if (!validName) {
+    throw new Error('Invalid function name');
+  }
+
+  this.functions[type][name] = fn;
+  console.log(`Defined function "${name}" under type "${type}"`);
+}
+```
+
+#### Execute Function Method
+
+We validate that the function name is safe to use before executing:
+
+```javascript
+executeFunction(type, name, el, args = []) {
+  if (!this.functions[type] || !this.functions[type][name]) {
+    throw new Error(`Function "${name}" not found in ${type}`);
+  }
+
+  // Validate that the function name is safe to use
+  const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(name);
+  if (!validName) {
+    throw new Error('Invalid function name');
+  }
+
+  try {
+    return this.functions[type][name](this, el, ...args);
+  } catch (e) {
+    console.error(`Error executing function "${name}":`, e);
+    throw e;
+  }
+}
+```
+
+#### Initialize Custom Function Calls Method
+
+We validate function names before adding event listeners:
+
+```javascript
+_initializeFunctionCalls() {
+  document.querySelectorAll(`#${this.config.id} [data-df-show]`).forEach((element) => {
+    const functionName = element.getAttribute('data-df-show');
+    if (functionName) {
+      // Validate the function name
+      const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
+      if (validName) {
+        console.log(`Executing show function: ${functionName}`);
+        this.executeFunction('show', functionName, element);
+      } else {
+        console.warn(`Invalid function name: ${functionName}`);
+      }
+    }
+  });
+
+  document.querySelectorAll(`#${this.config.id} [data-df-show]`).forEach((element) => {
+    const functionName = element.getAttribute('data-df-show');
+    if (functionName) {
+      // Validate the function name
+      const validName = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/.test(functionName);
+      if (validName) {
+        console.log(`Adding event listener for content function: ${functionName}`);
+
+        // Use a data attribute to track if the event listener has already been added
+        if (!element.hasAttribute('data-listener-added')) {
+          element.addEventListener('click', () => {
+            console.log(`Executing content function: ${functionName}`);
+            this.executeFunction('content', functionName, element);
+          });
+
+          // Mark this element as having the listener added
+          element.setAttribute('data-listener-added', 'true');
+        }
+      } else {
+        console.warn(`Invalid function name: ${functionName}`);
+      }
+    }
+  });
+}
+```
+
+By implementing these security measures, we ensure that the Convivial Decision Flow library provides a secure environment for defining and executing custom functions, significantly reducing the risk of security vulnerabilities.
+
 ## Getting Started
 
 ### Load the Required Files
@@ -89,7 +220,7 @@ To use the Convivial Decision Flow library, you need to include both the JavaScr
 
 ### HTML Structure
 
-Create your convivial decision flow using a series of nested `div` elements. Each `div` with the class `step` represents a step in the convivial decision flow. Use `data-dt-filter` attributes to conditionally display content.
+Create your decision flow using a series of nested `div` elements. Each `div` with the class `step` represents a step in the decision flow. Use `data-dt-filter` attributes to conditionally display content.
 
 ```html
 <div class="convivial-decision-flow" id="example-flow">
@@ -120,11 +251,10 @@ Create your convivial decision flow using a series of nested `div` elements. Eac
     <p>You selected Option 2.</p>
   </div>
 
-  <div class="step" id="summary" data-show-summary="true">
+  <div class="step" id="summary">
     <h3>Summary</h3>
-    <div class="convivial-decision-flow__summary_infos"></div>
-    <div class="convivial-decision-flow__history"></div>
-    <div class="convivial-decision-flow__submission"></div>
+    <div data-df-show="history"></div>
+    <div data-df-show="submission"></div>
   </div>
 
   <div class="convivial-decision-flow__footer">
@@ -136,20 +266,41 @@ Create your convivial decision flow using a series of nested `div` elements. Eac
 
 ### JavaScript Initialization
 
-The library automatically initializes all convivial decision flows on the page when the DOM content is loaded:
+The library automatically initializes all decision flows on the page when the DOM content is loaded:
 
 ```html
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('.convivial-decision-flow').forEach(function (flow) {
     if (flow.id) {
-      new DecisionTree(flow.id);
+      new ConvivialDecisionFlow(localStorage, flow.id, flow); // Modify as needed to use 'sessionStorage' or 'localStorage'
     } else {
       console.warn('Convivial decision flow does not have an ID.');
     }
   });
 });
 </script>
+```
+
+### Define and Execute Custom Functions
+
+You can define and store custom functions in the `functions` property map and execute them securely. Here's how:
+
+1. Define a function in the JavaScript:
+
+```javascript
+document.addEventListener('DOMContentLoaded', function () {
+  const dt = new ConvivialDecisionFlow(localStorage, 'example-flow', document.getElementById('example-flow'));
+  dt.functions.content['updateTextFunction'] = function (context, el) {
+    document.getElementById('custom-text').textContent = 'Updated text';
+  };
+});
+```
+
+2. Execute the function using the `data-df-show` attribute:
+
+```html
+<button data-df-show="updateTextFunction">Update Text</button>
 ```
 
 ## How to Compress the JS File
@@ -180,7 +331,7 @@ For more details, refer to the [npm documentation](https://docs.npmjs.com/updati
 
 ## Example Use Case
 
-Here's an example of how you can use the convivial decision flow in a web page:
+Here's an example of how you can use the decision flow in a web page:
 
 ```html
 <!DOCTYPE html>

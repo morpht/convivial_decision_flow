@@ -7,6 +7,11 @@
     <title>Convivial Decision Flow HTML Example</title>
     <link rel="stylesheet" type="text/css" href="../style.css">
     <script type="text/javascript" src="../convivial_decision_flow.js" defer></script>
+    <!-- Disable caching -->
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta http-equiv="Cache-Control" content="post-check=0, pre-check=0">
 </head>
 
 <body>
@@ -31,7 +36,7 @@
             </ul>
         </div>
         <div class="step" id="bookshop-find">
-            <h3 class="step__heading">Let's see if we can find something for you</h3>
+            <h3 class="step__heading">Shopping</h3>
             <p>We have a wide range of topics suitable for you.</p>
             <h4 class="step__question">What is your interest?</h4>
             <ul>
@@ -56,9 +61,6 @@
                     </a>
                 </li>
             </ul>
-            <div>
-                <p>You came here today to shop.</p>
-            </div>
         </div>
         <div class="step" id="bookshop-education" data-cookie="outcome=bookshop-education">
             <h3 class="step__heading">Find out about the Bookstore</h3>
@@ -70,7 +72,7 @@
             <p>We have a large selection of sci-fi books available for purchase. Please visit the sci-fi section of the
                 bookstore to browse the titles.</p>
         </div>
-        <div class="step" id="bookshop-fantasy" data-cookie="outcome=bookshop-fantasy" data-pass-filter="">
+        <div class="step" id="bookshop-fantasy" data-cookie="outcome=bookshop-fantasy">
             <h3 class="step__heading">Fantasy</h3>
             <p>We have a large range of fantasy books for purchase. Please visit the fantasy section of the bookstore to
                 browse the titles.</p>
@@ -86,10 +88,7 @@
         </div>
 
         <!-- Summary and Footer -->
-        <div class="convivial-decision-flow__summary">
-            <div class="convivial-decision-flow__summary_infos"></div>
-            <div class="convivial-decision-flow__history"></div>
-        </div>
+        <div data-df-show="history"></div>
         <div class="convivial-decision-flow__footer">
             <button class="btn btn-secondary step__button step__button--back">Back</button>
             <button class="btn btn-secondary step__button step__button--restart">Restart</button>
@@ -105,13 +104,13 @@
             <div>
                 <p>To start, please tell us your nationality and age:</p>
                 <form class="dt-form" action="#bar-age-based">
-                    <label class="step__question" for="nationality">Your nationality:</label>
+                    <label for="nationality">Your nationality:</label>
                     <select name="nationality" required>
                         <option value="australian">Australian</option>
                         <option value="czech">Czech</option>
                         <option value="japanese">Japanese</option>
                     </select>
-                    <label class="step__question" for="age">Your age:</label>
+                    <label for="age">Your age:</label>
                     <input type="number" name="age" placeholder="Your age" required>
                     <input type="submit" value="Next">
                 </form>
@@ -132,8 +131,7 @@
                     <li data-dt-filter="var_nationality_eq_czech"><a class="step__answer" href="#bar-spirits"
                             data-answer-path="spirits">Spirits</a></li>
                     <li data-dt-filter="var_nationality_eq_japanese"><a class="step__answer" href="#bar-sake"
-                            data-answer-path="sake">Sake</a>
-                    </li>
+                            data-answer-path="sake">Sake</a></li>
                 </ul>
             </div>
             <div data-dt-filter="!var_nationality_eq_japanese+var_age_lt_18,var_nationality_eq_japanese+var_age_lt_20">
@@ -160,7 +158,7 @@
             </div>
         </div>
         <div class="step" id="bar-vodka" data-cookie="outcome=bar-vodka">
-            <h3 class=" step__heading">Vodka</h3>
+            <h3 class="step__heading">Vodka</h3>
             <div>
                 <ul>
                     <li>Smirnoff</li>
@@ -206,11 +204,10 @@
         </div>
 
         <!-- Summary and Footer -->
-        <div class="convivial-decision-flow__summary">
-            <div class="convivial-decision-flow__summary_infos"></div>
-            <div class="convivial-decision-flow__history"></div>
-            <div class="convivial-decision-flow__submission"></div>
-        </div>
+        <div data-df-show="history"></div>
+        <div data-df-show="submission"></div>
+        <div data-df-show="yearsUntil100"></div>
+
         <div class="convivial-decision-flow__footer">
             <button class="btn btn-secondary step__button step__button--back">Back</button>
             <button class="btn btn-secondary step__button step__button--restart">Restart</button>
@@ -218,11 +215,20 @@
     </div>
 
     <script>
-        // Automatically initialize convivial decision flows on DOMContentLoaded
-        document.addEventListener('DOMContentLoaded', function () {
-            document.querySelectorAll('.convivial-decision-flow').forEach(function (flow) {
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.convivial-decision-flow').forEach((flow) => {
                 if (flow.id) {
-                    new DecisionTree(flow.id);
+                    const dt = new ConvivialDecisionFlow(localStorage, flow.id, flow);
+
+                    // Define the custom function for yearsUntil100
+                    dt.functions.show['yearsUntil100'] = (context, el) => {
+                        const age = context.storageData.vars.age || 0;
+
+                        if (age > 0) {
+                            const yearsUntil100 = 100 - age;
+                            el.innerHTML = `<h4>You have ${yearsUntil100} years until you turn 100.</h4>`;
+                        }
+                    };
                 } else {
                     console.warn('Convivial decision flow does not have an ID.');
                 }
