@@ -307,8 +307,7 @@ class ConvivialDecisionFlow {
         first_step: this.config.first_step,
         active: this.config.first_step,
         history: [this.config.first_step],
-        vars: {},
-        functions: {}
+        vars: {}
       };
 
       storageData.vars = { ...storageData.vars, ...vars };
@@ -399,9 +398,6 @@ class ConvivialDecisionFlow {
       if (!storageData.vars) {
         storageData.vars = {};
       }
-      if (!storageData.functions) {
-        storageData.functions = {};
-      }
       this.storageData = storageData;  // Initialize the storage object
       return storageData;
     }
@@ -409,8 +405,7 @@ class ConvivialDecisionFlow {
       first_step: this.config.first_step,
       active: this.config.first_step,
       history: [this.config.first_step],
-      vars: {},
-      functions: {}
+      vars: {}
     };
     return this.storageData;
   }
