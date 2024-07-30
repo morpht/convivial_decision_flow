@@ -35,9 +35,9 @@ The library supports handling form submissions within the decision flow. Forms c
 You can use data attributes to dynamically show or hide content based on user input. The supported filter criteria include:
 
 - **Variable Comparison**: Compare stored variables against specified values.
-  - Example: `data-dt-filter="var_age_gte_18"` (Shows content if age is greater than or equal to 18)
+  - Example: `data-df-filter="var_age_gte_18"` (Shows content if age is greater than or equal to 18)
 - **Step History**: Show content based on previously visited steps.
-  - Example: `data-dt-filter="visited_step-id"` (Shows content if a specific step was visited)
+  - Example: `data-df-filter="visited_step-id"` (Shows content if a specific step was visited)
 
 ### Summarization
 
@@ -61,25 +61,25 @@ At the end of the decision flow, you can include divs to show a summary of user 
 
 ### Complex Conditions
 
-You can define complex conditions in your decision flow using `data-dt-filter` attributes. The following examples illustrate how to use AND (`+`) and OR (`,`):
+You can define complex conditions in your decision flow using `data-df-filter` attributes. The following examples illustrate how to use AND (`+`) and OR (`,`):
 
 - **Logical AND**: All conditions must be true.
   ```html
-  <div data-dt-filter="var_age_gte_18+var_nationality_eq_japanese">
+  <div data-df-filter="var_age_gte_18+var_nationality_eq_japanese">
     Content for Japanese users aged 18 or older.
   </div>
   ```
 
 - **Logical OR**: At least one condition must be true.
   ```html
-  <div data-dt-filter="var_age_gte_18,var_nationality_eq_japanese">
+  <div data-df-filter="var_age_gte_18,var_nationality_eq_japanese">
     Content for users aged 18 or older or Japanese users.
   </div>
   ```
 
 - **Combination of AND and OR**:
   ```html
-  <div data-dt-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
+  <div data-df-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
     Content for users who are either non-Japanese aged 18 or older, or Japanese aged 20 or older.
   </div>
   ```
@@ -220,13 +220,13 @@ To use the Convivial Decision Flow library, you need to include both the JavaScr
 
 ### HTML Structure
 
-Create your decision flow using a series of nested `div` elements. Each `div` with the class `step` represents a step in the decision flow. Use `data-dt-filter` attributes to conditionally display content.
+Create your decision flow using a series of nested `div` elements. Each `div` with the class `step` represents a step in the decision flow. Use `data-df-filter` attributes to conditionally display content.
 
 ```html
 <div class="convivial-decision-flow" id="example-flow">
   <div class="step" id="step-1">
     <h3>Welcome</h3>
-    <form class="dt-form" action="#step-2">
+    <form class="df-form" action="#step-2">
       <label for="age">Enter your age:</label>
       <input type="number" name="age" required>
       <input type="submit" value="Next">

@@ -106,9 +106,9 @@ class ConvivialDecisionFlow {
           dtElement.textContent = questionElement ? questionElement.textContent.trim() : '';
           dlElement.appendChild(dtElement);
 
-          if (this.storageData.answers && this.storageData.answers[stepId]) {
+          if (this.storageData.history && this.storageData.history[stepId]) {
             const ddElement = document.createElement('dd');
-            ddElement.textContent = this.storageData.answers[stepId];
+            ddElement.textContent = this.storageData.history[stepId].answer;
             dlElement.appendChild(ddElement);
           }
         });
@@ -273,7 +273,7 @@ class ConvivialDecisionFlow {
     };
 
     this.functions.filter.process = (el) => {
-      const filters = el.getAttribute('data-dt-filter');
+      const filters = el.getAttribute('data-df-filter');
       if (!filters) return true;
       return filters.split(',').some(filter => {
         return filter.split('+').every(criteria => {
@@ -499,7 +499,7 @@ class ConvivialDecisionFlow {
       };
 
       // Add class to main div for better style targeting.
-      document.querySelector('#' + this.config.id).classList.add('dt-initialized');
+      document.querySelector('#' + this.config.id).classList.add('df-initialized');
 
       // Hide the history and submission sections on page load
       const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
@@ -524,7 +524,7 @@ class ConvivialDecisionFlow {
    * Initialize forms.
    */
   initializeForms() {
-    document.querySelectorAll('#' + this.config.id + ' .dt-form').forEach((form) => {
+    document.querySelectorAll('#' + this.config.id + ' .df-form').forEach((form) => {
       form.addEventListener('submit', (event) => {
         event.preventDefault();
         this.functions.form(form);
@@ -598,8 +598,8 @@ class ConvivialDecisionFlow {
    * Filter results elements by start and stop parameters.
    */
   filter() {
-    // Target elements with the data-dt-filter attribute within the specific config id
-    document.querySelectorAll('#' + this.config.id + ' [data-dt-filter]').forEach((element) => {
+    // Target elements with the data-df-filter attribute within the specific config id
+    document.querySelectorAll('#' + this.config.id + ' [data-df-filter]').forEach((element) => {
       if (this.functions.filter.process(element)) {
         this.show(element);
       } else {
@@ -642,8 +642,8 @@ class ConvivialDecisionFlow {
     const activeStepElement = document.querySelector('#' + this.config.id + ' #' + this.storageData.active);
     const selectedAnswerElement = activeStepElement.querySelector('.step__answer[data-selected="true"]');
     if (selectedAnswerElement) {
-      this.storageData.answers = this.storageData.answers || {};
-      this.storageData.answers[this.storageData.active] = selectedAnswerElement.textContent.trim();
+      this.storageData.history = this.storageData.history || {};
+      this.storageData.history[this.storageData.active] = { answer: selectedAnswerElement.textContent.trim() };
     }
 
     // Hide current/active step.
@@ -749,7 +749,6 @@ class ConvivialDecisionFlow {
     // Wipe out history and vars.
     this.storageData.history = [this.config.first_step];
     this.storageData.vars = {};
-    this.storageData.answers = {};  // Clear the stored answers
 
     // Save the storage.
     this._saveStorage();
@@ -843,18 +842,18 @@ document.addEventListener('DOMContentLoaded', function () {
   // Initialize the convivial decision flow object for all convivial decision flows.
   document.querySelectorAll('.convivial-decision-flow').forEach((el) => {
     if (el.hasAttribute('id')) {
-      const dt = new ConvivialDecisionFlow(localStorage, el.id, el); // Use localStorage or sessionStorage as needed
+      const df = new ConvivialDecisionFlow(localStorage, el.id, el); // Use localStorage or sessionStorage as needed
 
       // Hide the history and submission sections on page load if no data
       const historyElement = document.querySelector('.convivial-decision-flow__history');
       if (historyElement) {
-        const hasHistory = dt.storageData.history && dt.storageData.history.length > 1;
+        const hasHistory = df.storageData.history && df.storageData.history.length > 1;
         historyElement.style.display = hasHistory ? 'block' : 'none';
       }
 
       const submissionElement = document.querySelector('.convivial-decision-flow__submission');
       if (submissionElement) {
-        const hasSubmissions = Object.keys(dt.storageData.vars).length > 0;
+        const hasSubmissions = Object.keys(df.storageData.vars).length > 0;
         submissionElement.style.display = hasSubmissions ? 'block' : 'none';
       }
     } else {

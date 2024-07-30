@@ -103,7 +103,7 @@
             <h3 class="step__heading">Welcome to Our Bar</h3>
             <div>
                 <p>To start, please tell us your nationality and age:</p>
-                <form class="dt-form" action="#bar-age-based">
+                <form class="df-form" action="#bar-age-based">
                     <label for="nationality">Your nationality:</label>
                     <select name="nationality" required>
                         <option value="australian">Australian</option>
@@ -121,20 +121,20 @@
         <div class="step" id="bar-age-based" data-cookie="outcome=bar-age-based">
             <h3>Age-based Drink Recommendations</h3>
             <div
-                data-dt-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
+                data-df-filter="!var_nationality_eq_japanese+var_age_gte_18,var_nationality_eq_japanese+var_age_gte_20">
                 <p>Since you are over the legal drinking age, you might enjoy these alcoholic beverages.</p>
                 <p class="step__question">What type of drink do you prefer?</p>
                 <ul>
                     <li><a class="step__answer" href="#bar-beer" data-answer-path="beer">Beer</a></li>
-                    <li data-dt-filter="var_nationality_eq_australian"><a class="step__answer" href="#bar-vodka"
+                    <li data-df-filter="var_nationality_eq_australian"><a class="step__answer" href="#bar-vodka"
                             data-answer-path="vodka">Vodka</a></li>
-                    <li data-dt-filter="var_nationality_eq_czech"><a class="step__answer" href="#bar-spirits"
+                    <li data-df-filter="var_nationality_eq_czech"><a class="step__answer" href="#bar-spirits"
                             data-answer-path="spirits">Spirits</a></li>
-                    <li data-dt-filter="var_nationality_eq_japanese"><a class="step__answer" href="#bar-sake"
+                    <li data-df-filter="var_nationality_eq_japanese"><a class="step__answer" href="#bar-sake"
                             data-answer-path="sake">Sake</a></li>
                 </ul>
             </div>
-            <div data-dt-filter="!var_nationality_eq_japanese+var_age_lt_18,var_nationality_eq_japanese+var_age_lt_20">
+            <div data-df-filter="!var_nationality_eq_japanese+var_age_lt_18,var_nationality_eq_japanese+var_age_lt_20">
                 <p>For non-alcoholic options, try water or sodas.</p>
                 <ul>
                     <li><a class="step__answer" href="#bar-water" data-answer-path="water">Water</a></li>
@@ -148,12 +148,12 @@
             <h3 class="step__heading">Beer</h3>
             <div>
                 <ul>
-                    <li data-dt-filter="var_nationality_eq_australian">Carlton Draught</li>
-                    <li data-dt-filter="var_nationality_eq_australian">VB</li>
-                    <li data-dt-filter="var_nationality_eq_czech">Březňák</li>
-                    <li data-dt-filter="var_nationality_eq_czech">Starobrno</li>
-                    <li data-dt-filter="var_nationality_eq_japanese">Asahi</li>
-                    <li data-dt-filter="var_nationality_eq_japanese">Sapporo</li>
+                    <li data-df-filter="var_nationality_eq_australian">Carlton Draught</li>
+                    <li data-df-filter="var_nationality_eq_australian">VB</li>
+                    <li data-df-filter="var_nationality_eq_czech">Březňák</li>
+                    <li data-df-filter="var_nationality_eq_czech">Starobrno</li>
+                    <li data-df-filter="var_nationality_eq_japanese">Asahi</li>
+                    <li data-df-filter="var_nationality_eq_japanese">Sapporo</li>
                 </ul>
             </div>
         </div>
@@ -218,10 +218,10 @@
         document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.convivial-decision-flow').forEach((flow) => {
                 if (flow.id) {
-                    const dt = new ConvivialDecisionFlow(localStorage, flow.id, flow);
+                    const df = new ConvivialDecisionFlow(localStorage, flow.id, flow);
 
                     // Define the custom function for yearsUntil100
-                    dt.functions.show['yearsUntil100'] = (context, el) => {
+                    df.functions.show['yearsUntil100'] = (context, el) => {
                         const age = context.storageData.vars.age || 0;
 
                         if (age > 0) {
