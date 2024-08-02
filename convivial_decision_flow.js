@@ -4,11 +4,11 @@ class ConvivialDecisionFlow {
   /**
    * Convivial Decision Flow constructor.
    * 
-    * @param {Storage} storage - The storage object to use for storing data.
-    * @param {string} id - The ID of the convivial decision flow.
-    * @param {HTMLElement} domElement - The DOM element of the convivial decision flow.
-    * @throws {Error} - If the HTML structure is incorrect.
-    */
+   * @param {Storage} storage - The storage object to use for storing data.
+   * @param {string} id - The ID of the convivial decision flow.
+   * @param {HTMLElement} domElement - The DOM element of the convivial decision flow.
+   * @throws {Error} - If the HTML structure is incorrect.
+   */
   constructor(storage, id, domElement) {
     this.storage = storage;
     this.id = id;
@@ -20,7 +20,7 @@ class ConvivialDecisionFlow {
 
     const steps = this._loadSteps(id);
     if (Array.isArray(steps)) {
-      this.config = { id, first_step: steps[0], steps };
+      this.config = { id, steps };
       if (!this._isStorageAvailable()) {
         return;
       }
@@ -51,6 +51,39 @@ class ConvivialDecisionFlow {
     } else {
       throw new Error('Please follow proper HTML structure.');
     }
+  }
+
+  /**
+  * Capitalize the first letter of a string.
+  * @param {string} string - The string to capitalize.
+  * @returns {string} - The string with the first letter capitalized.
+  */
+  _capitalizeFirstLetter(string) {
+    if (typeof string !== 'string') return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
+
+  /**
+ * Basic HTML structure validation.
+ * @param {string} id - The ID of the convivial decision flow.
+ */
+  _validation(id) {
+    const steps = document.querySelector('#' + id).querySelectorAll('.step');
+    steps.forEach((el) => {
+      if (!el.hasAttribute('id')) {
+        console.warn('One of your steps in convivial decision flow with ID ' + id + ' does not have ID element filled.');
+      }
+    });
+
+    // Every answer must have href and should have a data-answer-path.
+    document.querySelector('#' + id).querySelectorAll('.step__answer').forEach((el) => {
+      if (!el.hasAttribute('href')) {
+        console.warn('One of your answers in convivial decision flow id ' + id + ' does not have href filled.');
+      }
+      if (!el.hasAttribute('data-answer-path')) {
+        console.warn('One of your answers in convivial decision flow id ' + id + ' does not have data-answer-path filled.');
+      }
+    });
   }
 
   /**
@@ -88,6 +121,8 @@ class ConvivialDecisionFlow {
   _defineDefaultFunctions() {
     if (this.definingDefaultFunctions) return;
     this.definingDefaultFunctions = true;
+    const firstStep = this.storageData.history[0];
+    const activeStep = this.storageData.history[this.storageData.history.length - 1];
 
     this.functions.show = {};
     this.functions.filter = {};
@@ -161,7 +196,7 @@ class ConvivialDecisionFlow {
 
     this.functions.show.summary = (context, el) => {
       this._cleanHTML();
-      let furtherQuestions = document.querySelector('#' + this.config.id + ' #' + this.storageData.active + ' .step__answer');
+      let furtherQuestions = document.querySelector('#' + this.config.id + ' #' + activeStep + ' .step__answer');
 
       if (furtherQuestions != null) {
         furtherQuestions = furtherQuestions.innerHTML.replace(/<\!--.*?-->/g, '').trim().length;
@@ -304,9 +339,7 @@ class ConvivialDecisionFlow {
 
       const namespace = `convivial-decision-flow.${this.config.id}`;
       const storageData = JSON.parse(this.storage.getItem(namespace)) || {
-        first_step: this.config.first_step,
-        active: this.config.first_step,
-        history: [this.config.first_step],
+        history: [firstStep],
         vars: {}
       };
 
@@ -373,12 +406,14 @@ class ConvivialDecisionFlow {
     // Reset history if it has legacy data/data which does not exist in DOM.
     const history = storageData.history ?? '';
     const steps = this.config.steps ? this.config.steps : this._loadSteps(this.config.id);
+    const firstStep = this.storageData.history[0];
+    const activeStep = this.storageData.history[this.storageData.history.length - 1];
 
     if (history.length > 0 && steps.length > 0) {
       const valid = history.every((val) => steps.indexOf(val) !== -1);
       if (valid === false) {
-        storageData.history = [this.config.first_step];
-        storageData.active = this.config.first_step;
+        storageData.history = [firstStep];
+        storageData.active = activeStep;
         this.storageData = storageData;
         this._saveStorage();
       }
@@ -402,64 +437,41 @@ class ConvivialDecisionFlow {
       return storageData;
     }
     this.storageData = {
-      first_step: this.config.first_step,
-      active: this.config.first_step,
-      history: [this.config.first_step],
+      history: [this.config.steps[0]], // Default history to the first step
       vars: {}
     };
     return this.storageData;
   }
 
   /**
-   * Save the active convivial decision flow to storage.
+   * Validate the history of the active convivial decision flow.
    */
-  _saveStorage() {
-    const namespace = `convivial-decision-flow.${this.config.id}`;
-    this.storage.setItem(namespace, JSON.stringify(this.storageData));
+  _validateHistory(storageData) {
+    // Reset history if it has legacy data/data which does not exist in DOM.
+    const history = storageData.history ?? '';
+    const steps = this.config.steps ? this.config.steps : this._loadSteps(this.config.id);
+
+    if (history.length > 0 && steps.length > 0) {
+      const valid = history.every((val) => steps.indexOf(val) !== -1);
+      if (valid === false) {
+        storageData.history = [steps[0]]; // Reset to the first step in the steps array
+        this.storageData = storageData;
+        this._saveStorage();
+      }
+    }
+
+    return storageData;
   }
 
   /**
-   * Basic HTML structure validation.
-   */
-  _validation(id) {
-    const steps = document.querySelector('#' + id).querySelectorAll('.step');
-    steps.forEach((el) => {
-      if (!el.hasAttribute('id')) {
-        console.warn('One of your steps in convivial decision flow with ID ' + id + ' does not have ID element filled.');
-      }
-    });
-
-    // Every answer must have href and should have a data-answer-path.
-    document.querySelector('#' + id).querySelectorAll('.step__answer').forEach((el) => {
-      if (!el.hasAttribute('href')) {
-        console.warn('One of your answers in convivial decision flow id ' + id + ' does not have href filled.');
-      }
-      if (!el.hasAttribute('data-answer-path')) {
-        console.warn('One of your answers in convivial decision flow id ' + id + ' does not have data-answer-path filled.');
-      }
-    });
-  }
-
-  _cleanHTML() {
-    // Clean HTML of all answers and remove styles.
-    document.querySelectorAll('#' + this.config.id + ' .convivial-decision-flow__summary').forEach((element) => {
-      element.removeAttribute('style');
-    });
-  }
-
-  /** Capitalize the first letter of a string. */
-  _capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-  }
-
-  /**
-   * Show the active step of the active convivial decision flow and store it to local
-   * storage.
+   * Activate the flow, setting the first step and current active step from history.
    */
   activate() {
     try {
+      const activeStep = this.storageData.history[this.storageData.history.length - 1];
+
       // Track step into google analytics.
-      this.trackGA(this.storageData.active + '/');
+      this.trackGA(activeStep + '/');
 
       // Hide all steps.
       document.querySelectorAll('#' + this.config.id + ' .step').forEach((step) => {
@@ -480,7 +492,7 @@ class ConvivialDecisionFlow {
       }
 
       // Load current step.
-      this.show('#' + this.config.id + ' #' + this.storageData.active);
+      this.show('#' + this.config.id + ' #' + activeStep);
 
       // If it is a last step - show Summary.
       this.functions.show.summary(this);
@@ -618,11 +630,11 @@ class ConvivialDecisionFlow {
       // Add the class 'convivial-decision-flow__footer' to the div element.
       divElement.classList.add('convivial-decision-flow__footer');
       // Set the innerHTML of the div element to the HTML string.
-      divElement.innerHTML = '<button class=\'step__button step__button--back\'>Back</button>\n<button class=\'step__button step__button--restart\'>Restart</button>';
+      divElement.innerHTML = '<button class="step__button step__button--back">Back</button>\n<button class="step__button step__button--restart">Restart</button>';
       // Insert the div element before the target element.
       document.querySelector('#' + this.config.id).appendChild(divElement);
     }
-    if (this.storageData.history && this.storageData.history.length > 1) {
+    if (this.storageData.history.length > 1) {
       this.show('#' + this.config.id + ' .convivial-decision-flow__footer');
     } else {
       this.hide('#' + this.config.id + ' .convivial-decision-flow__footer');
@@ -635,19 +647,19 @@ class ConvivialDecisionFlow {
   trackAnswer(nextStep, datakey) {
     // Track click on answer.
     if (datakey) {
-      this.trackGA(this.storageData.active + '/' + datakey);
+      this.trackGA(this.storageData.history[this.storageData.history.length - 1] + '/' + datakey);
     }
 
     // Store the selected answer in the storageData
-    const activeStepElement = document.querySelector('#' + this.config.id + ' #' + this.storageData.active);
+    const activeStepElement = document.querySelector('#' + this.config.id + ' #' + this.storageData.history[this.storageData.history.length - 1]);
     const selectedAnswerElement = activeStepElement.querySelector('.step__answer[data-selected="true"]');
     if (selectedAnswerElement) {
       this.storageData.history = this.storageData.history || {};
-      this.storageData.history[this.storageData.active] = { answer: selectedAnswerElement.textContent.trim() };
+      this.storageData.history[this.storageData.history[this.storageData.history.length - 1]] = { answer: selectedAnswerElement.textContent.trim() };
     }
 
     // Hide current/active step.
-    this.hide('#' + this.config.id + ' #' + this.storageData.active);
+    this.hide('#' + this.config.id + ' #' + this.storageData.history[this.storageData.history.length - 1]);
 
     // Show next step.
     this.show('#' + this.config.id + ' #' + nextStep);
@@ -655,19 +667,14 @@ class ConvivialDecisionFlow {
     // Track new step display.
     this.trackGA(nextStep + '/');
 
-    // Make the next step as active.
-    this.storageData.active = nextStep;
-
-    // Prevent duplicate entries in history
-    if (!this.storageData.history.includes(this.storageData.active)) {
-      this.storageData.history.push(this.storageData.active);
-    }
+    // Add the next step as the new active step in history.
+    this.storageData.history.push(nextStep);
 
     // Save the storage.
     this._saveStorage(this.config.id);
 
     // Track the attribute (setting cookie if needed).
-    this.trackAttribute(this.storageData.active);
+    this.trackAttribute(nextStep);
 
     // Detect if we are on last step and then display summary.
     this.functions.show.summary(this);
@@ -686,7 +693,29 @@ class ConvivialDecisionFlow {
     // Toggle Footer.
     this.toggleFooter();
   }
+  /**
+   * Save the current state of the decision flow to storage.
+   */
+  _saveStorage() {
+    const namespace = `convivial-decision-flow.${this.config.id}`;
+    this.storage.setItem(namespace, JSON.stringify(this.storageData));
+  }
 
+  /**
+   * Clean HTML by removing specific elements or attributes as needed.
+   */
+  _cleanHTML() {
+    // Example cleaning process, modify as needed
+    // Remove elements with a specific class or attribute, etc.
+    document.querySelectorAll('#' + this.config.id + ' .step__answer[data-remove]').forEach((el) => {
+      el.parentNode.removeChild(el);
+    });
+
+    // Example: Remove any elements with the 'data-remove' attribute
+    document.querySelectorAll('[data-remove]').forEach((el) => {
+      el.parentNode.removeChild(el);
+    });
+  }
   /**
    * Track the back button.
    */
@@ -696,7 +725,7 @@ class ConvivialDecisionFlow {
     }
 
     // Hide current/active step.
-    this.hide('#' + this.config.id + ' #' + this.storageData.active);
+    this.hide('#' + this.config.id + ' #' + this.storageData.history[this.storageData.history.length - 1]);
 
     // Show previous step from history.
     const previousStep = this.storageData.history[this.storageData.history.length - 2];
@@ -706,22 +735,19 @@ class ConvivialDecisionFlow {
     this.trackGA(previousStep + '/back');
 
     // Hide Step info and empty step info extra and step info heading.
-    this.hide('#' + this.config.id + ' #' + this.storageData.active + ' .step__info');
+    this.hide('#' + this.config.id + ' #' + this.storageData.history[this.storageData.history.length - 1] + ' .step__info');
 
     // Clean HTML from added elements.
     this._cleanHTML();
 
-    // Make the next step as active.
-    this.storageData.active = previousStep;
-
-    // Remove last step from history.
+    // Update active step to previous step
     this.storageData.history.pop();
 
     // Save the storage.
     this._saveStorage();
 
     // Track the attribute.
-    this.trackAttribute(this.storageData.active);
+    this.trackAttribute(previousStep);
 
     // Toggle Footer.
     this.toggleFooter();
@@ -732,29 +758,28 @@ class ConvivialDecisionFlow {
    */
   trackRestartButton() {
     // Hide current/active step.
-    this.hide('#' + this.config.id + ' #' + this.storageData.active);
+    this.hide('#' + this.config.id + ' #' + this.storageData.history[this.storageData.history.length - 1]);
 
     // Track the active step into google analytics.
-    this.trackGA(this.storageData.active + '/restart');
+    this.trackGA(this.storageData.history[this.storageData.history.length - 1] + '/restart');
 
-    // Make first step as active step.
-    this.storageData.active = this.config.first_step;
+    // Reset history to the first step
+    this.storageData.history = [this.config.steps[0]];
 
     // Show the first step.
-    this.show('#' + this.config.id + ' #' + this.storageData.active);
+    this.show('#' + this.config.id + ' #' + this.config.steps[0]);
 
     // Send first step data to GA.
-    this.trackGA(this.storageData.active);
+    this.trackGA(this.config.steps[0]);
 
-    // Wipe out history and vars.
-    this.storageData.history = [this.config.first_step];
+    // Wipe out vars.
     this.storageData.vars = {};
 
     // Save the storage.
     this._saveStorage();
 
     // Track the attribute.
-    this.trackAttribute(this.storageData.active);
+    this.trackAttribute(this.config.steps[0]);
 
     // Toggle Footer.
     this.toggleFooter();
