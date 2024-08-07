@@ -133,15 +133,19 @@ class ConvivialDecisionFlow {
         const dlElement = document.createElement('dl');
 
         this.storageData.history.forEach(stepObj => {
-          const { stepID, stepQuestion, stepAnswer } = stepObj;
+          const { stepQuestion, stepAnswer } = stepObj;
 
-          const dtElement = document.createElement('dt');
-          dtElement.textContent = stepQuestion;
-          dlElement.appendChild(dtElement);
+          if (stepQuestion) {
+            const dtElement = document.createElement('dt');
+            dtElement.textContent = stepQuestion;
+            dlElement.appendChild(dtElement);
+          }
 
-          const ddElement = document.createElement('dd');
-          ddElement.textContent = stepAnswer;
-          dlElement.appendChild(ddElement);
+          if (stepAnswer) {
+            const ddElement = document.createElement('dd');
+            ddElement.textContent = stepAnswer;
+            dlElement.appendChild(ddElement);
+          }
         });
 
         historyElement.innerHTML = '<h3>History</h3>';
@@ -657,7 +661,11 @@ class ConvivialDecisionFlow {
 
     this.trackGA(nextStep + '/');
 
-    this.storageData.history.push({ stepID: nextStep, stepQuestion: nextStepQuestion, stepAnswer: '' });
+    // Check if the next step already exists in the history
+    const lastStep = this.storageData.history[this.storageData.history.length - 1];
+    if (lastStep.stepID !== nextStep) {
+      this.storageData.history.push({ stepID: nextStep, stepQuestion: nextStepQuestion, stepAnswer: '' });
+    }
 
     this._saveStorage(this.config.id);
 
