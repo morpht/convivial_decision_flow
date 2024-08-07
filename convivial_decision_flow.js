@@ -132,26 +132,21 @@ class ConvivialDecisionFlow {
       if (this.storageData.history.length > 1 && historyElement) {
         const dlElement = document.createElement('dl');
 
-        // Iterate through the history and capture question-answer pairs
-        this.storageData.history.forEach(stepId => {
-          const stepElement = document.querySelector(`#${this.config.id} #${stepId}`);
-          const questionElement = stepElement.querySelector('.step__question');
+        this.storageData.history.forEach(stepObj => {
+          const { stepID, stepQuestion, stepAnswer } = stepObj;
 
           const dtElement = document.createElement('dt');
-          dtElement.textContent = questionElement ? questionElement.textContent.trim() : '';
+          dtElement.textContent = stepQuestion;
           dlElement.appendChild(dtElement);
 
-          if (this.storageData.history && this.storageData.history[stepId]) {
-            const ddElement = document.createElement('dd');
-            ddElement.textContent = this.storageData.history[stepId].answer;
-            dlElement.appendChild(ddElement);
-          }
+          const ddElement = document.createElement('dd');
+          ddElement.textContent = stepAnswer;
+          dlElement.appendChild(ddElement);
         });
 
         historyElement.innerHTML = '<h3>History</h3>';
         historyElement.appendChild(dlElement);
 
-        // Ensure the history element is visible
         historyElement.style.display = 'block';
       }
     };
@@ -196,6 +191,7 @@ class ConvivialDecisionFlow {
 
     this.functions.show.summary = (context, el) => {
       this._cleanHTML();
+      const activeStep = this.storageData.history[this.storageData.history.length - 1].stepID;
       let furtherQuestions = document.querySelector('#' + this.config.id + ' #' + activeStep + ' .step__answer');
 
       if (furtherQuestions != null) {
@@ -209,8 +205,8 @@ class ConvivialDecisionFlow {
         if (this.storageData.history && this.storageData.history.length > 1) {
           const history = this.storageData.history.slice();
 
-          history.forEach((el) => {
-            const stepElement = document.querySelector('#' + this.config.id + ' #' + el);
+          history.forEach((stepObj) => {
+            const stepElement = document.querySelector('#' + this.config.id + ' #' + stepObj.stepID);
             if (stepElement) {
               const questionElement = stepElement.querySelector('.step__question');
               const titleElement = stepElement.querySelector('.step__heading');
@@ -263,6 +259,7 @@ class ConvivialDecisionFlow {
         }
       }
     };
+
 
     this.functions.filter.compare = (variableValue, operator, comparator) => {
       if (!isNaN(variableValue)) variableValue = parseFloat(variableValue);
@@ -339,7 +336,7 @@ class ConvivialDecisionFlow {
 
       const namespace = `convivial-decision-flow.${this.config.id}`;
       const storageData = JSON.parse(this.storage.getItem(namespace)) || {
-        history: [firstStep],
+        history: [{ stepID: this.config.steps[0], stepQuestion: '', stepAnswer: '' }],
         vars: {}
       };
 
@@ -348,10 +345,13 @@ class ConvivialDecisionFlow {
 
       this.storageData = storageData;
       const nextStep = form.getAttribute('action').replace('#', '');
+      if (!document.querySelector(`#${this.config.id} #${nextStep}`)) {
+        console.warn(`Next step element with ID ${nextStep} not found.`);
+        return;
+      }
       this.trackAnswer(nextStep);
       this.filter();
 
-      // Execute custom show functions for elements with data-df-show attribute
       document.querySelectorAll(`#${this.config.id} [data-df-show]`).forEach((element) => {
         const functionName = element.getAttribute('data-df-show');
         if (functionName && this.functions.show && this.functions.show[functionName]) {
@@ -403,17 +403,13 @@ class ConvivialDecisionFlow {
    * Validate the history of the active convivial decision flow.
    */
   _validateHistory(storageData) {
-    // Reset history if it has legacy data/data which does not exist in DOM.
     const history = storageData.history ?? '';
     const steps = this.config.steps ? this.config.steps : this._loadSteps(this.config.id);
-    const firstStep = this.storageData.history[0];
-    const activeStep = this.storageData.history[this.storageData.history.length - 1];
 
     if (history.length > 0 && steps.length > 0) {
-      const valid = history.every((val) => steps.indexOf(val) !== -1);
+      const valid = history.every((val) => steps.indexOf(val.stepID) !== -1);
       if (valid === false) {
-        storageData.history = [firstStep];
-        storageData.active = activeStep;
+        storageData.history = [{ stepID: steps[0], stepQuestion: '', stepAnswer: '' }];
         this.storageData = storageData;
         this._saveStorage();
       }
@@ -437,7 +433,7 @@ class ConvivialDecisionFlow {
       return storageData;
     }
     this.storageData = {
-      history: [this.config.steps[0]], // Default history to the first step
+      history: [{ stepID: this.config.steps[0], stepQuestion: '', stepAnswer: '' }],
       vars: {}
     };
     return this.storageData;
@@ -447,14 +443,13 @@ class ConvivialDecisionFlow {
    * Validate the history of the active convivial decision flow.
    */
   _validateHistory(storageData) {
-    // Reset history if it has legacy data/data which does not exist in DOM.
-    const history = storageData.history ?? '';
+    const history = storageData.history ?? [];
     const steps = this.config.steps ? this.config.steps : this._loadSteps(this.config.id);
 
     if (history.length > 0 && steps.length > 0) {
-      const valid = history.every((val) => steps.indexOf(val) !== -1);
+      const valid = history.every((val) => steps.indexOf(val.stepID) !== -1);
       if (valid === false) {
-        storageData.history = [steps[0]]; // Reset to the first step in the steps array
+        storageData.history = [{ stepID: steps[0], stepQuestion: '', stepAnswer: '' }];
         this.storageData = storageData;
         this._saveStorage();
       }
@@ -468,52 +463,39 @@ class ConvivialDecisionFlow {
    */
   activate() {
     try {
-      const activeStep = this.storageData.history[this.storageData.history.length - 1];
+      const currentStep = this.storageData.history[this.storageData.history.length - 1];
+      const activeStepID = currentStep.stepID;
 
-      // Track step into google analytics.
-      this.trackGA(activeStep + '/');
+      this.trackGA(activeStepID + '/');
 
-      // Hide all steps.
       document.querySelectorAll('#' + this.config.id + ' .step').forEach((step) => {
         this.hide(step);
       });
 
-      // Toggle footer.
       this.toggleFooter();
 
-      // Create a summary element if not present
       if (!document.querySelector('#' + this.config.id + ' .convivial-decision-flow__summary')) {
-        // Create a new div element
         const divElement = document.createElement('div');
-        // Add the class 'convivial-decision-flow__summary' to the div element
         divElement.classList.add('convivial-decision-flow__summary');
-        // Insert the div element before the target element
         document.querySelector('#' + this.config.id + ' .convivial-decision-flow__footer').prepend(divElement);
       }
 
-      // Load current step.
-      this.show('#' + this.config.id + ' #' + activeStep);
+      this.show('#' + this.config.id + ' #' + activeStepID);
 
-      // If it is a last step - show Summary.
       this.functions.show.summary(this);
 
-      // Filter results by start and stop parameters.
       this.filter();
 
-      // Track back button.
       document.querySelector('#' + this.config.id + ' .convivial-decision-flow__footer .step__button--back').onclick = () => {
         this.trackBackButton();
       };
 
-      // Track restart button.
       document.querySelector('#' + this.config.id + ' .convivial-decision-flow__footer .step__button--restart').onclick = () => {
         this.trackRestartButton();
       };
 
-      // Add class to main div for better style targeting.
       document.querySelector('#' + this.config.id).classList.add('df-initialized');
 
-      // Hide the history and submission sections on page load
       const historyElement = document.querySelector('#' + this.config.id + ' .convivial-decision-flow__history');
       if (historyElement) {
         historyElement.style.display = 'none';
@@ -524,7 +506,6 @@ class ConvivialDecisionFlow {
         submissionElement.style.display = 'none';
       }
 
-      // Save the storage.
       this._saveStorage();
     } catch (e) {
       this.hide('#' + this.config.id);
@@ -645,41 +626,45 @@ class ConvivialDecisionFlow {
    * Track the answer.
    */
   trackAnswer(nextStep, datakey) {
-    // Track click on answer.
+    const currentStep = this.storageData.history[this.storageData.history.length - 1];
     if (datakey) {
-      this.trackGA(this.storageData.history[this.storageData.history.length - 1] + '/' + datakey);
+      this.trackGA(currentStep.stepID + '/' + datakey);
     }
 
-    // Store the selected answer in the storageData
-    const activeStepElement = document.querySelector('#' + this.config.id + ' #' + this.storageData.history[this.storageData.history.length - 1]);
+    const activeStepElement = document.querySelector('#' + this.config.id + ' #' + currentStep.stepID);
+    if (!activeStepElement) {
+      console.warn(`Active step element with ID ${currentStep.stepID} not found.`);
+      return;
+    }
+
     const selectedAnswerElement = activeStepElement.querySelector('.step__answer[data-selected="true"]');
     if (selectedAnswerElement) {
-      this.storageData.history = this.storageData.history || {};
-      this.storageData.history[this.storageData.history[this.storageData.history.length - 1]] = { answer: selectedAnswerElement.textContent.trim() };
+      currentStep.stepAnswer = selectedAnswerElement.textContent.trim();
     }
 
-    // Hide current/active step.
-    this.hide('#' + this.config.id + ' #' + this.storageData.history[this.storageData.history.length - 1]);
+    this.hide('#' + this.config.id + ' #' + currentStep.stepID);
 
-    // Show next step.
+    const nextStepElement = document.querySelector('#' + this.config.id + ' #' + nextStep);
+    if (!nextStepElement) {
+      console.warn(`Next step element with ID ${nextStep} not found.`);
+      return;
+    }
+
+    const nextStepQuestionElement = nextStepElement.querySelector('.step__question');
+    const nextStepQuestion = nextStepQuestionElement ? nextStepQuestionElement.textContent.trim() : '';
+
     this.show('#' + this.config.id + ' #' + nextStep);
 
-    // Track new step display.
     this.trackGA(nextStep + '/');
 
-    // Add the next step as the new active step in history.
-    this.storageData.history.push(nextStep);
+    this.storageData.history.push({ stepID: nextStep, stepQuestion: nextStepQuestion, stepAnswer: '' });
 
-    // Save the storage.
     this._saveStorage(this.config.id);
 
-    // Track the attribute (setting cookie if needed).
     this.trackAttribute(nextStep);
 
-    // Detect if we are on last step and then display summary.
     this.functions.show.summary(this);
 
-    // Ensure history and submission sections are updated immediately
     const historyElement = document.querySelector('#' + this.config.id + ' [data-df-show="history"]');
     if (historyElement) {
       this.executeFunction('show', 'history', historyElement);
@@ -690,9 +675,9 @@ class ConvivialDecisionFlow {
       this.executeFunction('show', 'submission', submissionElement);
     }
 
-    // Toggle Footer.
     this.toggleFooter();
   }
+
   /**
    * Save the current state of the decision flow to storage.
    */
