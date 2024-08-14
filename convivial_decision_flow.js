@@ -610,13 +610,9 @@ class ConvivialDecisionFlow {
    */
   toggleFooter() {
     if (!document.querySelector('#' + this.config.id + ' .convivial-decision-flow__footer')) {
-      // Create a new div element.
       const divElement = document.createElement('div');
-      // Add the class 'convivial-decision-flow__footer' to the div element.
       divElement.classList.add('convivial-decision-flow__footer');
-      // Set the innerHTML of the div element to the HTML string.
       divElement.innerHTML = '<button class="step__button step__button--back">Back</button>\n<button class="step__button step__button--restart">Restart</button>';
-      // Insert the div element before the target element.
       document.querySelector('#' + this.config.id).appendChild(divElement);
     }
     if (this.storageData.history.length > 1) {
@@ -718,29 +714,24 @@ class ConvivialDecisionFlow {
     }
 
     // Hide current/active step.
-    this.hide('#' + this.config.id + ' #' + this.storageData.history[this.storageData.history.length - 1]);
+    const currentStep = this.storageData.history.pop();
+    this.hide('#' + this.config.id + ' #' + currentStep.stepID);
 
-    // Show previous step from history.
-    const previousStep = this.storageData.history[this.storageData.history.length - 2];
-    this.show('#' + this.config.id + ' #' + previousStep);
+    // Show the previous step from history.
+    const previousStep = this.storageData.history[this.storageData.history.length - 1];
+    this.show('#' + this.config.id + ' #' + previousStep.stepID);
 
     // Track current step.
-    this.trackGA(previousStep + '/back');
-
-    // Hide Step info and empty step info extra and step info heading.
-    this.hide('#' + this.config.id + ' #' + this.storageData.history[this.storageData.history.length - 1] + ' .step__info');
+    this.trackGA(previousStep.stepID + '/back');
 
     // Clean HTML from added elements.
     this._cleanHTML();
-
-    // Update active step to previous step
-    this.storageData.history.pop();
 
     // Save the storage.
     this._saveStorage();
 
     // Track the attribute.
-    this.trackAttribute(previousStep);
+    this.trackAttribute(previousStep.stepID);
 
     // Toggle Footer.
     this.toggleFooter();
@@ -751,19 +742,22 @@ class ConvivialDecisionFlow {
    */
   trackRestartButton() {
     // Hide current/active step.
-    this.hide('#' + this.config.id + ' #' + this.storageData.history[this.storageData.history.length - 1]);
+    const currentStep = this.storageData.history[this.storageData.history.length - 1];
+    this.hide('#' + this.config.id + ' #' + currentStep.stepID);
 
-    // Track the active step into google analytics.
-    this.trackGA(this.storageData.history[this.storageData.history.length - 1] + '/restart');
+    // Track the restart action in Google Analytics.
+    this.trackGA(currentStep.stepID + '/restart');
 
     // Reset history to the first step
-    this.storageData.history = [this.config.steps[0]];
+    const firstStep = this.config.steps[0];
+    this.storageData.history = [{ stepID: firstStep, stepQuestion: '', stepAnswer: '' }];
+    this.storageData.active = firstStep;
 
     // Show the first step.
-    this.show('#' + this.config.id + ' #' + this.config.steps[0]);
+    this.show('#' + this.config.id + ' #' + firstStep);
 
     // Send first step data to GA.
-    this.trackGA(this.config.steps[0]);
+    this.trackGA(firstStep);
 
     // Wipe out vars.
     this.storageData.vars = {};
@@ -772,7 +766,7 @@ class ConvivialDecisionFlow {
     this._saveStorage();
 
     // Track the attribute.
-    this.trackAttribute(this.config.steps[0]);
+    this.trackAttribute(firstStep);
 
     // Toggle Footer.
     this.toggleFooter();
