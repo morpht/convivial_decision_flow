@@ -407,16 +407,38 @@ class ConvivialDecisionFlow {
    * Validate the history of the active convivial decision flow.
    */
   _validateHistory(storageData) {
-    const history = storageData.history ?? '';
     const steps = this.config.steps ? this.config.steps : this._loadSteps(this.config.id);
 
-    if (history.length > 0 && steps.length > 0) {
-      const valid = history.every((val) => steps.indexOf(val.stepID) !== -1);
-      if (valid === false) {
-        storageData.history = [{ stepID: steps[0], stepQuestion: '', stepAnswer: '' }];
+    if (storageData.history.length > 0 && steps.length > 0) {
+      storageData.history = storageData.history.map(entry => {
+        if (typeof entry === 'string') {
+          // Convert any legacy string entries to object format
+          return {
+            stepID: entry,
+            stepQuestion: '',
+            stepAnswer: ''
+          };
+        } else {
+          return entry; // Already in the correct format
+        }
+      });
+
+      const valid = storageData.history.every(val => steps.includes(val.stepID));
+      if (!valid) {
+        storageData.history = [{
+          stepID: steps[0],
+          stepQuestion: '',
+          stepAnswer: ''
+        }];
         this.storageData = storageData;
         this._saveStorage();
       }
+    } else {
+      storageData.history = [{
+        stepID: steps[0],
+        stepQuestion: '',
+        stepAnswer: ''
+      }];
     }
 
     return storageData;
@@ -428,19 +450,35 @@ class ConvivialDecisionFlow {
   _loadStorage(id) {
     const namespace = `convivial-decision-flow.${id}`;
     let storageData = JSON.parse(this.storage.getItem(namespace)) || {};
-    if (Object.keys(storageData).length !== 0) {
-      storageData = this._validateHistory(storageData);
-      if (!storageData.vars) {
-        storageData.vars = {};
-      }
-      this.storageData = storageData;  // Initialize the storage object
-      return storageData;
+
+    // Ensure history is an array of objects with stepID, stepQuestion, and stepAnswer
+    if (!storageData.history || !Array.isArray(storageData.history)) {
+      storageData.history = [{
+        stepID: this.config.steps[0],
+        stepQuestion: '',
+        stepAnswer: ''
+      }];
+    } else {
+      storageData.history = storageData.history.map(entry => {
+        if (typeof entry === 'string') {
+          // Convert legacy string entries to object format
+          return {
+            stepID: entry,
+            stepQuestion: '',
+            stepAnswer: ''
+          };
+        } else {
+          return entry; // Already in the correct format
+        }
+      });
     }
-    this.storageData = {
-      history: [{ stepID: this.config.steps[0], stepQuestion: '', stepAnswer: '' }],
-      vars: {}
-    };
-    return this.storageData;
+
+    if (!storageData.vars) {
+      storageData.vars = {};
+    }
+
+    this.storageData = storageData;
+    return storageData;
   }
 
   /**
@@ -657,10 +695,13 @@ class ConvivialDecisionFlow {
 
     this.trackGA(nextStep + '/');
 
-    // Check if the next step already exists in the history
-    const lastStep = this.storageData.history[this.storageData.history.length - 1];
-    if (lastStep.stepID !== nextStep) {
-      this.storageData.history.push({ stepID: nextStep, stepQuestion: nextStepQuestion, stepAnswer: '' });
+    // Ensure the next step is added as an object with the correct format
+    if (!this.storageData.history.some(step => step.stepID === nextStep)) {
+      this.storageData.history.push({
+        stepID: nextStep,
+        stepQuestion: nextStepQuestion,
+        stepAnswer: ''
+      });
     }
 
     this._saveStorage(this.config.id);
